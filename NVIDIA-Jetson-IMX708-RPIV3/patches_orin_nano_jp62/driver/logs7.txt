@@ -1,0 +1,82 @@
+dev@dev-desktop:~/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver$ chmod +x diagnose_i2c.sh 
+dev@dev-desktop:~/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver$ ./diagnose_i2c.sh 
+=== IMX708 I2C/GPIO Diagnostic ===
+
+1. Scanning ALL I2C buses for camera (0x1a or 0x10):
+   IMX708 addresses: 0x1a (default), 0x10 (alternate)
+
+--- Bus 0 ---
+00:                         -- -- -- -- -- -- -- -- 
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+   *** POSSIBLE CAMERA FOUND ON BUS 0 ***
+
+--- Bus 1 ---
+00:                         -- -- -- -- -- -- -- -- 
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- UU -- -- -- -- -- -- -- -- -- -- 
+   *** POSSIBLE CAMERA FOUND ON BUS 1 ***
+
+--- Bus 2 ---
+00:                         -- -- -- -- -- -- -- -- 
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+   *** POSSIBLE CAMERA FOUND ON BUS 2 ***
+
+--- Bus 4 ---
+00:                         -- -- -- -- -- -- -- -- 
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+   *** POSSIBLE CAMERA FOUND ON BUS 4 ***
+
+--- Bus 5 ---
+00:                         -- -- -- -- -- -- -- -- 
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+   *** POSSIBLE CAMERA FOUND ON BUS 5 ***
+
+--- Bus 7 ---
+00:                         -- -- -- -- -- -- -- -- 
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+   *** POSSIBLE CAMERA FOUND ON BUS 7 ***
+
+--- Bus 9 ---
+
+2. I2C bus to physical mapping:
+   i2c-0: /bus@0/i2c@3160000 (Gen1)
+   i2c-1: /bus@0/i2c@c240000 (Gen2)
+   i2c-2: /bus@0/i2c@3180000 (CAM I2C - expected for camera)
+   i2c-3: /bus@0/i2c@3190000
+
+3. Check if camera node exists in device tree:
+   ✗ Camera node NOT found in device tree
+   Checking what's in i2c@3180000:
+'#address-cells'	  clocks	 interrupts	 reg
+ assigned-clock-parents   compatible	 iommus		 reset-names
+ assigned-clocks	  dma-coherent	 name		 resets
+ clock-frequency	  dma-names	 phandle	'#size-cells'
+ clock-names		  dmas		 prod-settings	 status
+
+4. GPIO status check:
+   Looking for GPIO chip and available GPIOs...
+
+
+5. Check tegra-camera-platform:
+   ✗ tegra-camera-platform NOT found
+
+6. Physical connection check:
+   Is the camera ribbon cable connected to CAM0 (22-pin connector)?
+   - Blue side of ribbon faces AWAY from the board
+   - Connector latch must be closed
+
+7. Power rails check (requires camera to be probed):
+       3520000.padctl-avdd-usb    1                                 0mA     0mV     0mV
+
+=== End Diagnostic ===
+
+NEXT STEPS:
+1. If camera found on different bus - update DTS target-path
+2. If no camera on any bus - check physical connection
+3. If camera node missing from DT - overlay not applied correctly
+
