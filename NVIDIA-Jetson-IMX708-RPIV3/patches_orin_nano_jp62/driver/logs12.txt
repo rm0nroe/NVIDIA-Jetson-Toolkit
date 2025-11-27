@@ -1,0 +1,22 @@
+rin_nano_jp62/driver$ ./check_camera.sh
+=== IMX708 Camera Status Check ===
+
+1. Kernel module status:
+   ✓ nv_imx708 module is loaded
+
+2. Video devices:
+   ✗ No /dev/video* devices found
+
+3. IMX708 dmesg logs:
+[sudo] password for dev: 
+[    9.197323] nv_imx708: module verification failed: signature and/or required key missing - tainting kernel
+
+4. Camera/sensor probe logs:
+[    9.197323] nv_imx708: module verification failed: signature and/or required key missing - tainting kernel
+
+5. I2C device check (address 0x1a on bus 2):
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+
+=== End of Check ===
+
