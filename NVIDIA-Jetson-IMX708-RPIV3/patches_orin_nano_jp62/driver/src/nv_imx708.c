@@ -734,12 +734,14 @@ register_error:
 
 }
 
-static void imx708_remove(struct i2c_client *client)
+static int imx708_remove(struct i2c_client *client)
 {
 	struct camera_common_data *s_data = to_camera_common_data(&client->dev);
 	struct imx708 *priv = (struct imx708 *)s_data->priv;
 	tegracam_v4l2subdev_unregister(priv->tc_dev);
 	tegracam_device_unregister(priv->tc_dev);
+
+	return 0;
 }
 
 static const struct i2c_device_id imx708_id[] = {
