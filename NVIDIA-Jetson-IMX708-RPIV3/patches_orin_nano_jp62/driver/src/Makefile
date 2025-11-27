@@ -18,3 +18,8 @@ ccflags-y += -I$(KERNEL_SRC)/nvidia-oot/include
 ccflags-y += -I$(KERNEL_SRC)/nvidia/include
 # Local project headers
 ccflags-y += -I$(src)/../include
+
+# Symbol resolution for NVIDIA tegracam framework
+# The driver depends on symbols exported by NVIDIA's OOT camera modules
+# (tegracam_device_register, camera_common_regulator_get, etc.)
+KBUILD_EXTRA_SYMBOLS ?= $(NVIDIA_OOT_SRC)/Module.symvers

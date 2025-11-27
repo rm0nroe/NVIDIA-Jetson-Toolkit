@@ -62,6 +62,8 @@ check_dependencies() {
     # Check for NVIDIA OOT (out-of-tree) kernel headers
     # These contain tegra_v4l2_camera.h and tegracam_core.h required for camera drivers
     NVIDIA_OOT_HEADERS="/usr/src/nvidia/nvidia-oot/include/media/tegra_v4l2_camera.h"
+    NVIDIA_OOT_SYMVERS="/usr/src/nvidia/nvidia-oot/Module.symvers"
+
     if [ ! -f "$NVIDIA_OOT_HEADERS" ]; then
         echo_warn "NVIDIA OOT headers not found at /usr/src/nvidia/nvidia-oot/"
         echo_info "Installing nvidia-l4t-kernel-oot-headers..."
@@ -86,6 +88,43 @@ check_dependencies() {
         fi
     fi
     echo_info "NVIDIA OOT headers found at /usr/src/nvidia/nvidia-oot/"
+
+    # Check for NVIDIA OOT Module.symvers (required for symbol resolution)
+    # This file contains exported symbols from tegracam framework modules
+    if [ ! -f "$NVIDIA_OOT_SYMVERS" ]; then
+        echo_warn "NVIDIA OOT Module.symvers not found"
+        echo_info "This file is required for linking against tegracam framework"
+        echo_info "Attempting to install nvidia-l4t-kernel-oot-headers..."
+        sudo apt-get update
+        sudo apt-get install -y nvidia-l4t-kernel-oot-headers || true
+
+        # If still missing, try to generate from installed modules
+        if [ ! -f "$NVIDIA_OOT_SYMVERS" ]; then
+            echo_warn "Module.symvers not provided by package"
+            echo_info "Checking for pre-built NVIDIA modules..."
+
+            # Check if nvidia modules are loaded and symvers exists elsewhere
+            ALTERNATE_SYMVERS="/usr/src/nvidia/Module.symvers"
+            if [ -f "$ALTERNATE_SYMVERS" ]; then
+                echo_info "Found Module.symvers at $ALTERNATE_SYMVERS"
+                sudo mkdir -p /usr/src/nvidia/nvidia-oot
+                sudo cp "$ALTERNATE_SYMVERS" "$NVIDIA_OOT_SYMVERS"
+            else
+                echo_error "Module.symvers not found"
+                echo_info ""
+                echo_info "The Module.symvers file contains symbol exports from NVIDIA's"
+                echo_info "tegracam framework (tegracam_device_register, etc.)"
+                echo_info ""
+                echo_info "Options to resolve:"
+                echo_info "  1. Install full NVIDIA kernel source:"
+                echo_info "     sudo apt install nvidia-l4t-kernel-oot-source"
+                echo_info "  2. Build NVIDIA OOT modules from source to generate Module.symvers"
+                echo_info "  3. Download from NVIDIA L4T BSP and extract"
+                exit 1
+            fi
+        fi
+    fi
+    echo_info "NVIDIA OOT Module.symvers found"
 
     # Check for dtc
     if ! command -v dtc &> /dev/null; then

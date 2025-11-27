@@ -46,7 +46,17 @@ modules:
 		echo "Install with: sudo apt install nvidia-l4t-kernel-oot-headers"; \
 		exit 1; \
 	fi
-	$(MAKE) -C $(KERNEL_SRC) M=$(PWD)/src NVIDIA_OOT_SRC=$(NVIDIA_OOT_SRC) NVIDIA_SRC=$(NVIDIA_SRC) modules
+	@if [ ! -f "$(NVIDIA_OOT_SRC)/Module.symvers" ]; then \
+		echo "Error: NVIDIA OOT Module.symvers not found at $(NVIDIA_OOT_SRC)/Module.symvers"; \
+		echo "This file contains symbol exports needed for tegracam framework"; \
+		echo "Install with: sudo apt install nvidia-l4t-kernel-oot-headers"; \
+		exit 1; \
+	fi
+	$(MAKE) -C $(KERNEL_SRC) M=$(PWD)/src \
+		NVIDIA_OOT_SRC=$(NVIDIA_OOT_SRC) \
+		NVIDIA_SRC=$(NVIDIA_SRC) \
+		KBUILD_EXTRA_SYMBOLS=$(NVIDIA_OOT_SRC)/Module.symvers \
+		modules
 
 dtbo: $(DTBO_FILE)
 
