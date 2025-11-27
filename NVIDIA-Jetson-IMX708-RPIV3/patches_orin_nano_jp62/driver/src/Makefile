@@ -3,7 +3,18 @@
 
 obj-m := nv_imx708.o
 
+# NVIDIA OOT headers location for JetPack 6.2
+# These are installed by nvidia-l4t-kernel-oot-headers package
+NVIDIA_OOT_SRC ?= /usr/src/nvidia/nvidia-oot
+NVIDIA_SRC ?= /usr/src/nvidia
+
 # Include paths for tegracam headers
-ccflags-y := -I$(KERNEL_SRC)/nvidia-oot/include
+# Primary: NVIDIA out-of-tree modules headers (where tegra_v4l2_camera.h lives)
+ccflags-y := -I$(NVIDIA_OOT_SRC)/include
+ccflags-y += -I$(NVIDIA_OOT_SRC)/include/media
+ccflags-y += -I$(NVIDIA_SRC)/include
+# Fallback: Check in kernel source tree (older JetPack versions)
+ccflags-y += -I$(KERNEL_SRC)/nvidia-oot/include
 ccflags-y += -I$(KERNEL_SRC)/nvidia/include
+# Local project headers
 ccflags-y += -I$(src)/../include

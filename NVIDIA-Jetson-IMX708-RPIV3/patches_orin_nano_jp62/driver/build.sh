@@ -59,6 +59,34 @@ check_dependencies() {
         }
     fi
 
+    # Check for NVIDIA OOT (out-of-tree) kernel headers
+    # These contain tegra_v4l2_camera.h and tegracam_core.h required for camera drivers
+    NVIDIA_OOT_HEADERS="/usr/src/nvidia/nvidia-oot/include/media/tegra_v4l2_camera.h"
+    if [ ! -f "$NVIDIA_OOT_HEADERS" ]; then
+        echo_warn "NVIDIA OOT headers not found at /usr/src/nvidia/nvidia-oot/"
+        echo_info "Installing nvidia-l4t-kernel-oot-headers..."
+        sudo apt-get update
+        sudo apt-get install -y nvidia-l4t-kernel-oot-headers || {
+            echo_error "Failed to install NVIDIA OOT headers"
+            echo_info "Try: sudo apt install nvidia-l4t-kernel-oot-headers"
+            echo_info "Or download from NVIDIA BSP sources"
+            exit 1
+        }
+        # Verify installation
+        if [ ! -f "$NVIDIA_OOT_HEADERS" ]; then
+            echo_error "NVIDIA OOT headers still not found after installation"
+            echo_info "Required header: media/tegra_v4l2_camera.h"
+            echo_info "Expected location: /usr/src/nvidia/nvidia-oot/include/"
+            echo_info ""
+            echo_info "Alternative: Download NVIDIA L4T Sources and extract headers"
+            echo_info "  1. Download from: https://developer.nvidia.com/embedded/jetson-linux"
+            echo_info "  2. Extract public_sources.tbz2"
+            echo_info "  3. Copy nvidia-oot/include to /usr/src/nvidia/nvidia-oot/"
+            exit 1
+        fi
+    fi
+    echo_info "NVIDIA OOT headers found at /usr/src/nvidia/nvidia-oot/"
+
     # Check for dtc
     if ! command -v dtc &> /dev/null; then
         missing_deps+=("device-tree-compiler")

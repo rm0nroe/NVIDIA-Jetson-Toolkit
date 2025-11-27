@@ -15,6 +15,11 @@ DRIVER_NAME := nv_imx708
 KERNEL_VER ?= $(shell uname -r)
 KERNEL_SRC ?= /lib/modules/$(KERNEL_VER)/build
 
+# NVIDIA out-of-tree source locations for JetPack 6.2
+# These paths contain tegra_v4l2_camera.h and tegracam_core.h
+NVIDIA_OOT_SRC ?= /usr/src/nvidia/nvidia-oot
+NVIDIA_SRC ?= /usr/src/nvidia
+
 # Installation paths
 MODULE_INSTALL_DIR := /lib/modules/$(KERNEL_VER)/updates/drivers/media/i2c
 DTBO_INSTALL_DIR := /boot
@@ -36,7 +41,12 @@ modules:
 		echo "Install with: sudo apt install nvidia-l4t-kernel-headers"; \
 		exit 1; \
 	fi
-	$(MAKE) -C $(KERNEL_SRC) M=$(PWD)/src modules
+	@if [ ! -d "$(NVIDIA_OOT_SRC)/include" ]; then \
+		echo "Error: NVIDIA OOT headers not found at $(NVIDIA_OOT_SRC)"; \
+		echo "Install with: sudo apt install nvidia-l4t-kernel-oot-headers"; \
+		exit 1; \
+	fi
+	$(MAKE) -C $(KERNEL_SRC) M=$(PWD)/src NVIDIA_OOT_SRC=$(NVIDIA_OOT_SRC) NVIDIA_SRC=$(NVIDIA_SRC) modules
 
 dtbo: $(DTBO_FILE)
 
@@ -102,5 +112,12 @@ help:
 	@echo "  help      - Show this help message"
 	@echo ""
 	@echo "Variables:"
-	@echo "  KERNEL_VER - Kernel version (default: $(KERNEL_VER))"
-	@echo "  KERNEL_SRC - Kernel source/headers path (default: $(KERNEL_SRC))"
+	@echo "  KERNEL_VER     - Kernel version (default: $(KERNEL_VER))"
+	@echo "  KERNEL_SRC     - Kernel source/headers path (default: $(KERNEL_SRC))"
+	@echo "  NVIDIA_OOT_SRC - NVIDIA out-of-tree source path (default: $(NVIDIA_OOT_SRC))"
+	@echo "  NVIDIA_SRC     - NVIDIA source path (default: $(NVIDIA_SRC))"
+	@echo ""
+	@echo "Required packages:"
+	@echo "  nvidia-l4t-kernel-headers     - Kernel headers for module compilation"
+	@echo "  nvidia-l4t-kernel-oot-headers - NVIDIA tegracam headers (tegra_v4l2_camera.h)"
+	@echo "  device-tree-compiler          - DTC for device tree overlay compilation"
