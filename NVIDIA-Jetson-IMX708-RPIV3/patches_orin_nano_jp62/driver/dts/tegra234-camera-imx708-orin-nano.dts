@@ -48,7 +48,7 @@
 
 	/* Fragment 1: NVCSI configuration */
 	fragment@1 {
-		target-path = "/host1x@13e00000/nvcsi@15a00000";
+		target-path = "/bus@0/host1x@13e00000/nvcsi@15a00000";
 		__overlay__ {
 			status = "okay";
 			num-channels = <1>;
