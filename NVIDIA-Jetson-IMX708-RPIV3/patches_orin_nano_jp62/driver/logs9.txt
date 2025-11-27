@@ -1,0 +1,45 @@
+dev@dev-desktop:~/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver$ for bus in 0 1 2 7; do echo "=== Bus $bus ===" && sudo i2cdetect -y $bus; done
+=== Bus 0 ===
+Warning: Can't use SMBus Quick Write command, will skip some addresses
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:                                                 
+10:                                                 
+20:                                                 
+30: -- -- -- -- -- -- -- --                         
+40:                                                 
+50: UU -- -- -- -- -- -- UU -- -- -- -- -- -- -- -- 
+60:                                                 
+70:                                                 
+=== Bus 1 ===
+Warning: Can't use SMBus Quick Write command, will skip some addresses
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:                                                 
+10:                                                 
+20:                                                 
+30: -- -- -- -- -- -- -- --                         
+40:                                                 
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+60:                                                 
+70:                                                 
+=== Bus 2 ===
+Warning: Can't use SMBus Quick Write command, will skip some addresses
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:                                                 
+10:                                                 
+20:                                                 
+30: -- -- -- -- -- -- -- --                         
+40:                                                 
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+60:                                                 
+70:                                                 
+=== Bus 7 ===
+Warning: Can't use SMBus Quick Write command, will skip some addresses
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:                                                 
+10:                                                 
+20:                                                 
+30: -- -- -- -- -- -- -- --                         
+40:                                                 
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+60:                                                 
+70:      
