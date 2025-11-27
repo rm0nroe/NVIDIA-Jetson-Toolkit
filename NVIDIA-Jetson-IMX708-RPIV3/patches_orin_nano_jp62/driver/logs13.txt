@@ -1,0 +1,29 @@
+=== Device Tree Check ===
+
+1. Check if imx708 node exists in LIVE device tree:
+   ✗ imx708 node NOT found
+   Contents of i2c@3180000:
+'#address-cells'	  clocks	 interrupts	 reg
+ assigned-clock-parents   compatible	 iommus		 reset-names
+ assigned-clocks	  dma-coherent	 name		 resets
+ clock-frequency	  dma-names	 phandle	'#size-cells'
+ clock-names		  dmas		 prod-settings	 status
+
+2. Check tegra-camera-platform:
+   ✗ tegra-camera-platform NOT found
+
+3. DTB file sizes (larger = has overlay):
+   /boot/ location (used by bootloader):
+-rw-r--r-- 1 root root 252699 Nov 27 15:43 /boot/kernel_tegra234-p3768-0000+p3767-0005-nv-super.dtb
+-rw-r--r-- 1 root root 249353 Nov 27 15:43 /boot/kernel_tegra234-p3768-0000+p3767-0005-nv-super.dtb.backup
+
+   /boot/dtb/ location:
+-rw-r--r-- 1 root root 252699 Nov 27 15:43 /boot/dtb/kernel_tegra234-p3768-0000+p3767-0005-nv-super.dtb
+-rw-r--r-- 1 root root 249353 Nov 27 14:42 /boot/dtb/kernel_tegra234-p3768-0000+p3767-0005-nv-super.dtb.backup
+
+4. Check imx708 in DTB files:
+   /boot/kernel_*.dtb:
+   ✓ imx708 FOUND in file
+
+=== End Check ===
+
