@@ -1,0 +1,109 @@
+rin_nano_jp62/driver$ ./check_boot_config.sh 
+=== Boot Configuration Check ===
+
+1. extlinux.conf contents:
+TIMEOUT 30
+DEFAULT primary
+
+MENU TITLE L4T boot options
+
+LABEL primary
+      MENU LABEL primary kernel
+      LINUX /boot/Image
+      INITRD /boot/initrd
+      APPEND ${cbootargs} root=/dev/mmcblk0p1 rw rootwait rootfstype=ext4 mminit_loglevel=4 console=ttyTCU0,115200 firmware_class.path=/etc/firmware fbcon=map:0 nospectre_bhb video=efifb:off console=tty0
+      OVERLAYS /boot/tegra234-camera-imx708-orin-nano.dtbo
+
+# When testing a custom kernel, it is recommended that you create a backup of
+# the original kernel and add a new entry to this file so that the device can
+# fallback to the original kernel. To do this:
+#
+# 1, Make a backup of the original kernel
+#      sudo cp /boot/Image /boot/Image.backup
+#
+# 2, Copy your custom kernel into /boot/Image
+#
+# 3, Uncomment below menu setting lines for the original kernel
+#
+# 4, Reboot
+
+# LABEL backup
+#    MENU LABEL backup kernel
+#    LINUX /boot/Image.backup
+#    INITRD /boot/initrd
+#    APPEND ${cbootargs}
+
+
+2. Check for FDT/FDTDIR in extlinux:
+   No FDT line found (bootloader auto-selects)
+
+3. Boot partitions:
+NAME           SIZE MOUNTPOINT LABEL
+loop0           16M            
+mmcblk0      231.4G            
+├─mmcblk0p1    230G /          
+├─mmcblk0p2    128M            
+├─mmcblk0p3    768K            
+├─mmcblk0p4   31.6M            
+├─mmcblk0p5    128M            
+├─mmcblk0p6    768K            
+├─mmcblk0p7   31.6M            
+├─mmcblk0p8     80M            
+├─mmcblk0p9    512K            
+├─mmcblk0p10    64M /boot/efi  
+├─mmcblk0p11    80M            
+├─mmcblk0p12   512K            
+├─mmcblk0p13    64M            
+├─mmcblk0p14   400M            
+└─mmcblk0p15 479.5M            
+zram0          635M [SWAP]     
+zram1          635M [SWAP]     
+
+4. Check UEFI/cboot DTB location:
+   Looking for DTB partition...
+   No DTB partition label found
+
+5. Kernel boot command line:
+root=/dev/mmcblk0p1 rw rootwait rootfstype=ext4 mminit_loglevel=4 console=ttyTCU0,115200 firmware_class.path=/etc/firmware fbcon=map:0 nospectre_bhb video=efifb:off console=tty0 bl_prof_dataptr=2031616@0x271E10000 bl_prof_ro_ptr=65536@0x271E00000 
+
+6. Check jetson-io tool (if available):
+   ✓ jetson-io tool found
+   Available hardware configs:
+Header 1 [default]: Jetson 40pin Header
+  Available hardware modules:
+  1. Adafruit SPH0645LM4H
+  2. Adafruit UDA1334A
+  3. FE-PI Audio V1 and Z V2
+  4. ReSpeaker 4 Mic Array
+  5. ReSpeaker 4 Mic Linear Array
+Header 2: Jetson 24pin CSI Connector
+  Available hardware modules:
+  1. Camera IMX219 Dual
+  2. Camera IMX219-A
+  3. Camera IMX219-A and IMX477-C
+  4. Camera IMX219-C
+  5. Camera IMX477 Dual
+  6. Camera IMX477 Dual 4 lane
+  7. Camera IMX477-A
+  8. Camera IMX477-A and IMX219-C
+  9. Camera IMX477-C
+Header 3: Jetson M.2 Key E Slot
+  No hardware configurations found!
+
+7. Check /boot/dtb symbolic link:
+total 524
+drwxr-xr-x 2 root root   4096 Nov 27 14:42 .
+drwxr-xr-x 5 root root  24576 Nov 27 15:43 ..
+-rw-r--r-- 1 root root 252699 Nov 27 15:43 kernel_tegra234-p3768-0000+p3767-0005-nv-super.dtb
+-rw-r--r-- 1 root root 249353 Nov 27 14:42 kernel_tegra234-p3768-0000+p3767-0005-nv-super.dtb.backup
+
+8. NVIDIA DTB update tools:
+   nv-update-dtb not found
+nv-l4t-bootloader-config.service  nv-l4t-bootloader-config.sh
+
+=== Possible Solution ===
+Try adding explicit FDT line to extlinux.conf:
+   FDT /boot/kernel_tegra234-p3768-0000+p3767-0005-nv-super.dtb
+
+=== End Check ===
+
