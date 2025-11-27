@@ -1,41 +1,31 @@
-dev@dev-desktop:~/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver$ ./build.sh
+dev@dev-desktop:~/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver$ ./validate.sh 
 ==========================================
-IMX708 Camera Driver Build Script
+IMX708 Camera Validation Script
 JetPack 6.2 (L4T R36.4.x)
 ==========================================
 
-[INFO] Detected Jetson platform:
-# R36 (release), REVISION: 4.7, GCID: 42132812, BOARD: generic, EABI: aarch64, DATE: Thu Sep 18 22:54:44 UTC 2025
-# KERNEL_VARIANT: oot
-TARGET_USERSPACE_LIB_DIR=nvidia
-TARGET_USERSPACE_LIB_DIR_PATH=usr/lib/aarch64-linux-gnu/nvidia
-[INFO] Checking dependencies...
-[INFO] NVIDIA OOT headers found at /usr/src/nvidia/nvidia-oot/
-[INFO] All dependencies satisfied
-[INFO] Kernel version: 5.15.148-tegra
-[INFO] Kernel headers: /lib/modules/5.15.148-tegra/build
-
-[INFO] Building kernel module...
-Building kernel module for kernel 5.15.148-tegra...
-make -C /lib/modules/5.15.148-tegra/build M=/home/dev/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver/src NVIDIA_OOT_SRC=/usr/src/nvidia/nvidia-oot NVIDIA_SRC=/usr/src/nvidia modules
-make[1]: Entering directory '/usr/src/linux-headers-5.15.148-tegra-ubuntu22.04_aarch64/3rdparty/canonical/linux-jammy/kernel-source'
-warning: the compiler differs from the one used to build the kernel
-  The kernel was built by: gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
-  You are using:           gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0
-  CC [M]  /home/dev/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver/src/nv_imx708.o
-  MODPOST /home/dev/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver/src/Module.symvers
-ERROR: modpost: "regmap_util_write_table_8" [/home/dev/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver/src/nv_imx708.ko] undefined!
-ERROR: modpost: "tegracam_get_privdata" [/home/dev/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver/src/nv_imx708.ko] undefined!
-ERROR: modpost: "tegracam_v4l2subdev_register" [/home/dev/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver/src/nv_imx708.ko] undefined!
-ERROR: modpost: "tegracam_set_privdata" [/home/dev/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver/src/nv_imx708.ko] undefined!
-ERROR: modpost: "tegracam_device_register" [/home/dev/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver/src/nv_imx708.ko] undefined!
-ERROR: modpost: "camera_common_regulator_get" [/home/dev/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver/src/nv_imx708.ko] undefined!
-ERROR: modpost: "tegracam_device_unregister" [/home/dev/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver/src/nv_imx708.ko] undefined!
-ERROR: modpost: "tegracam_v4l2subdev_unregister" [/home/dev/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver/src/nv_imx708.ko] undefined!
-ERROR: modpost: "sensor_common_parse_num_modes" [/home/dev/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver/src/nv_imx708.ko] undefined!
-make[2]: *** [scripts/Makefile.modpost:133: /home/dev/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver/src/Module.symvers] Error 1
-make[2]: *** Deleting file '/home/dev/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver/src/Module.symvers'
-make[1]: *** [Makefile:1830: modules] Error 2
-make[1]: Leaving directory '/usr/src/linux-headers-5.15.148-tegra-ubuntu22.04_aarch64/3rdparty/canonical/linux-jammy/kernel-source'
-make: *** [Makefile:41: modules] Error 2
+[INFO] Test 1: Checking kernel module...
+[PASS] Kernel module 'nv_imx708' is loaded
+dev@dev-desktop:~/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver$ ls /dev/video*
+ls: cannot access '/dev/video*': No such file or directory
+dev@dev-desktop:~/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver$ dmesg | grep -i imx708
+dmesg: read kernel buffer failed: Operation not permitted
+dev@dev-desktop:~/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver$ sudo dmesg | grep -i imx708
+[sudo] password for dev: 
+[    9.050917] nv_imx708: module verification failed: signature and/or required key missing - tainting kernel
+dev@dev-desktop:~/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver$ sudo dmesg | grep -i "imx708\|tegra.*camera\|probe"
+[    8.736522] systemd[1]: Created slice Slice /system/modprobe.
+[    9.050917] nv_imx708: module verification failed: signature and/or required key missing - tainting kernel
+[    9.843679] dce: tegra_dce_probe:245  Found display consumer device
+[    9.879134] nvvrs_pseq 4-003c: NVVRS PSEQ probe successful
+[   10.275734]  c000000.aon:hsp: probed
+[   10.686954] rtk_btusb: btusb_probe intf->cur_altsetting->desc.bInterfaceNumber 0
+[   10.686957] rtk_btusb: btusb_probe can_wakeup 1, may wakeup 0
+[   10.698606] rtk_btusb: btusb_probe: done
+dev@dev-desktop:~/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver$ sudo dmesg | grep -i overlay
+[    3.844463] Checking overlayfs setting...
+[    3.854458] Overlayfs is disabled...
+[   15.895675] overlayfs: idmapped layers are currently not supported
+dev@dev-desktop:~/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver$ sudo i2cdetect -y -r 10
+Error: Could not open file `/dev/i2c-10' or `/dev/i2c/10': No such file or directory
 
