@@ -1,7 +1,12 @@
 # IMX708 Driver Rebuild After GPIO Fix
 
-The reset GPIO was incorrectly set to 54 (GEN1_I2C_SCL_PI3) instead of 62 (CAM0_PWDN = GPIO H6).
-This fix enables proper camera reset control.
+The reset GPIO was incorrectly set using mainline Linux GPIO offset formula (7*8+6=62).
+JetPack 6.2/L4T 36.4 uses different GPIO port offsets - PH.06 (CAM0_PWDN) is at offset **49**, not 62.
+
+**Root Cause**: NVIDIA has [conflicting tegra234-gpio.h definitions](https://forums.developer.nvidia.com/t/conflicting-tegra234-gpio-defs/262485)
+between mainline Linux and JetPack kernels.
+
+**Fix**: Changed `reset-gpios = <&gpio 62 1>` to `reset-gpios = <&gpio 49 1>`
 
 ## Step 1: Pull the Fix
 
@@ -26,14 +31,10 @@ sudo ./build.sh install
 
 ```bash
 # Apply to kernel_ prefixed DTB
-sudo fdtoverlay -i /boot/kernel_tegra234-p3768-0000+p3767-0005-nv-super.dtb.backup \
-  -o /boot/kernel_tegra234-p3768-0000+p3767-0005-nv-super.dtb \
-  /boot/tegra234-camera-imx708-orin-nano.dtbo
+sudo fdtoverlay -i /boot/kernel_tegra234-p3768-0000+p3767-0005-nv-super.dtb.backup -o /boot/kernel_tegra234-p3768-0000+p3767-0005-nv-super.dtb /boot/tegra234-camera-imx708-orin-nano.dtbo
 
 # Apply to non-prefixed DTB
-sudo fdtoverlay -i /boot/tegra234-p3768-0000+p3767-0005-nv-super.dtb.backup \
-  -o /boot/tegra234-p3768-0000+p3767-0005-nv-super.dtb \
-  /boot/tegra234-camera-imx708-orin-nano.dtbo
+sudo fdtoverlay -i /boot/tegra234-p3768-0000+p3767-0005-nv-super.dtb.backup -o /boot/tegra234-p3768-0000+p3767-0005-nv-super.dtb /boot/tegra234-camera-imx708-orin-nano.dtbo
 ```
 
 ## Step 5: Reboot
@@ -63,7 +64,7 @@ sudo i2cdetect -y -r 2
 ### Check GPIO State
 
 ```bash
-sudo cat /sys/kernel/debug/gpio | grep -iE "H6|cam|62"
+sudo cat /sys/kernel/debug/gpio | grep -iE "PH.06|gpio-397"
 ```
 
 ### Check Video Device

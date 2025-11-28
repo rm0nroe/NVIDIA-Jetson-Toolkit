@@ -7,7 +7,7 @@
  *
  * Supports single camera on CAM0 (CSI port A)
  * I2C address: 0x1a on i2c@3180000 (bus 2)
- * Reset GPIO: H6 (TEGRA234_MAIN_GPIO(H, 6))
+ * Reset GPIO: PH.06 (CAM0_PWDN) - offset 49 in JetPack 6.2
  *
  * Note: JetPack 6.2 uses direct I2C without cam_i2cmux
  */
@@ -102,8 +102,8 @@
 				sensor_model = "imx708";
 				use_sensor_mode_id = "true";
 
-				/* Reset GPIO - H6 for CAM0 on Orin Nano */
-				reset-gpios = <&gpio 62 1>; /* GPIO H6 = 7*8+6 = 62, GPIO_ACTIVE_LOW */
+				/* Reset GPIO - PH.06 (CAM0_PWDN) for CAM0 on Orin Nano */
+				reset-gpios = <&gpio 49 1>; /* PH.06 = offset 49 in JetPack 6.2, GPIO_ACTIVE_LOW */
 
 				/* IMX708_MODE_4608x2592_14fps */
 				mode0 {
