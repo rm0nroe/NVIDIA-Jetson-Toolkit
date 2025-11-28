@@ -1,15 +1,15 @@
 /*
- * Device Tree Overlay for IMX708 Camera on Jetson Orin Nano Super
+ * Device Tree Overlay for IMX708 Camera on Jetson Orin Nano Developer Kit
  * JetPack 6.2 (L4T R36.4.x)
  *
  * Copyright (c) 2023-2024, RidgeRun <support@ridgerun.com>
  * Copyright (c) 2022-2024, NVIDIA CORPORATION. All rights reserved.
  *
  * Supports single camera on CAM0 (CSI port A)
- * I2C address: 0x1a on i2c@3180000 (direct I2C, no mux on Super variant)
+ * I2C address: 0x1a on cam_i2cmux/i2c@0 (I2C mux channel 0 for CAM0)
  * Reset GPIO: H6 (TEGRA234_MAIN_GPIO(H, 6))
  *
- * Note: Orin Nano Super (p3767-0005) uses direct I2C without cam_i2cmux
+ * Note: Orin Nano Developer Kit uses I2C mux - CAM0 is on mux channel 0 (i2c-10)
  */
 
 /dts-v1/;
@@ -83,9 +83,9 @@
 		};
 	};
 
-	/* Fragment 2: I2C sensor node on i2c@3180000 (direct I2C for Orin Nano Super) */
+	/* Fragment 2: I2C sensor node on cam_i2cmux channel 0 (CAM0) */
 	fragment@2 {
-		target-path = "/bus@0/i2c@3180000";
+		target-path = "/cam_i2cmux/i2c@0";
 		__overlay__ {
 			status = "okay";
 			#address-cells = <1>;
@@ -186,7 +186,7 @@
 						orientation = "1";
 						drivernode0 {
 							pcl_id = "v4l2_sensor";
-							sysfs-device-tree = "/sys/firmware/devicetree/base/bus@0/i2c@3180000/rbpcv3_imx708_a@1a";
+							sysfs-device-tree = "/sys/firmware/devicetree/base/cam_i2cmux/i2c@0/rbpcv3_imx708_a@1a";
 						};
 					};
 				};
