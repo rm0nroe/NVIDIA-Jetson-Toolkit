@@ -103,7 +103,7 @@
 				use_sensor_mode_id = "true";
 
 				/* Reset GPIO - H6 for CAM0 on Orin Nano */
-				reset-gpios = <&gpio 54 1>; /* GPIO H6 = 7*8+6 = 62, active high */
+				reset-gpios = <&gpio 62 1>; /* GPIO H6 = 7*8+6 = 62, GPIO_ACTIVE_LOW */
 
 				/* IMX708_MODE_4608x2592_14fps */
 				mode0 {
