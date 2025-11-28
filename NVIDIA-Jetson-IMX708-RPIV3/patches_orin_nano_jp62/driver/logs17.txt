@@ -1,0 +1,131 @@
+rin_nano_jp62/driver$ chmod +x diagnose_hw.sh 
+dev@dev-desktop:~/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver$ sudo ./diagnose_hw.sh 
+[sudo] password for dev: 
+=== IMX708 Hardware Diagnostic ===
+
+1. Scan ALL I2C buses for ANY device:
+
+=== I2C Bus 0 ===
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:                         -- -- -- -- -- -- -- -- 
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+50: UU -- -- -- -- -- -- UU -- -- -- -- -- -- -- -- 
+60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+70: -- -- -- -- -- -- -- --                         
+
+=== I2C Bus 1 ===
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:                         -- -- -- -- -- -- -- -- 
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- UU -- -- -- -- -- -- -- -- -- -- 
+30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+40: UU -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+70: -- -- -- -- -- -- -- --                         
+
+=== I2C Bus 2 ===
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:                         -- -- -- -- -- -- -- -- 
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+70: -- -- -- -- -- -- -- --                         
+
+=== I2C Bus 4 ===
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:                         -- -- -- -- -- -- -- -- 
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+30: -- -- -- -- -- -- -- -- -- -- -- -- UU -- -- -- 
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+70: -- -- -- -- -- -- -- --                         
+
+=== I2C Bus 5 ===
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:                         -- -- -- -- -- -- -- -- 
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+70: -- -- -- -- -- -- -- --                         
+
+=== I2C Bus 7 ===
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:                         -- -- -- -- -- -- -- -- 
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+70: -- -- -- -- -- -- -- --                         
+
+=== I2C Bus 9 ===
+
+2. Check GPIO state for camera reset:
+   Looking for CAM-related GPIOs...
+ gpio-500 (PAF.00              )
+ gpio-501 (PAF.01              )
+ gpio-502 (PAF.02              )
+ gpio-503 (PAF.03              )
+ gpio-504 (PAG.00              )
+ gpio-505 (PAG.01              )
+ gpio-506 (PAG.02              )
+ gpio-507 (PAG.03              )
+ gpio-508 (PAG.04              )
+ gpio-509 (PAG.05              )
+ gpio-510 (PAG.06              )
+ gpio-511 (PAG.07              )
+
+3. Check camera reset GPIO from device tree:
+   DTS reset-gpios setting:
+00000000: 0000 00f3 0000 0036 0000 0001            .......6....
+
+4. Check regulator/power status:
+       3520000.padctl-avdd-usb    1                                 0mA     0mV     0mV
+
+5. Physical connection checklist:
+   [ ] Camera ribbon cable firmly seated in CAM0 connector
+   [ ] Connector latch is CLOSED (pushed down)
+   [ ] Blue side of ribbon faces AWAY from Jetson board
+   [ ] Cable not damaged or creased
+   [ ] Camera module LED (if any) lit when powered
+
+6. Try manual GPIO reset toggle:
+   (This may help wake up the camera)
+./diagnose_hw.sh: line 45: /sys/class/gpio/export: No such file or directory
+./diagnose_hw.sh: line 45: /sys/class/gpio/export: No such file or directory
+./diagnose_hw.sh: line 45: /sys/class/gpio/export: No such file or directory
+./diagnose_hw.sh: line 45: /sys/class/gpio/export: No such file or directory
+./diagnose_hw.sh: line 45: /sys/class/gpio/export: No such file or directory
+
+7. Re-check I2C bus 2 after GPIO toggle:
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:                         -- -- -- -- -- -- -- -- 
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+70: -- -- -- -- -- -- -- --                         
+
+=== End Diagnostic ===
+
+If camera still not detected on I2C:
+  - Double-check physical cable connection
+  - Try reseating the ribbon cable
+  - Verify camera works on Raspberry Pi (if possible)
+  - Check if Arducam UC-376 needs different I2C address
+
