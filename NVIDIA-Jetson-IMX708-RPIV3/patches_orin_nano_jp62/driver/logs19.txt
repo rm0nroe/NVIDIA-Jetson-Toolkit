@@ -1,0 +1,193 @@
+dev@dev-desktop:~/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver$ git pull
+dremote: Enumerating objects: 13, done.
+remote: Counting objects: 100% (13/13), done.
+remote: Compressing objects: 100% (3/3), done.
+remote: Total 7 (delta 3), reused 7 (delta 3), pack-reused 0 (from 0)
+Unpacking objects: 100% (7/7), 661 bytes | 165.00 KiB/s, done.
+From https://github.com/rm0nroe/Nvidia-Jetson-Toolkit
+   9182ed1..e281f61  main       -> origin/main
+Updating 9182ed1..e281f61
+Fast-forward
+ .../driver/dts/tegra234-camera-imx708-orin-nano.dts          | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+dev@dev-desktop:~/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver$ ./build.sh
+==========================================
+IMX708 Camera Driver Build Script
+JetPack 6.2 (L4T R36.4.x)
+==========================================
+
+[INFO] Detected Jetson platform:
+# R36 (release), REVISION: 4.7, GCID: 42132812, BOARD: generic, EABI: aarch64, DATE: Thu Sep 18 22:54:44 UTC 2025
+# KERNEL_VARIANT: oot
+TARGET_USERSPACE_LIB_DIR=nvidia
+TARGET_USERSPACE_LIB_DIR_PATH=usr/lib/aarch64-linux-gnu/nvidia
+[INFO] Checking dependencies...
+[INFO] NVIDIA OOT headers found at /usr/src/nvidia/nvidia-oot/
+[INFO] NVIDIA OOT Module.symvers found
+[INFO] All dependencies satisfied
+[INFO] Kernel version: 5.15.148-tegra
+[INFO] Kernel headers: /lib/modules/5.15.148-tegra/build
+
+[INFO] Building kernel module...
+Building kernel module for kernel 5.15.148-tegra...
+make -C /lib/modules/5.15.148-tegra/build M=/home/dev/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver/src \
+	NVIDIA_OOT_SRC=/usr/src/nvidia/nvidia-oot \
+	NVIDIA_SRC=/usr/src/nvidia \
+	KBUILD_EXTRA_SYMBOLS=/usr/src/nvidia/nvidia-oot/Module.symvers \
+	modules
+make[1]: Entering directory '/usr/src/linux-headers-5.15.148-tegra-ubuntu22.04_aarch64/3rdparty/canonical/linux-jammy/kernel-source'
+warning: the compiler differs from the one used to build the kernel
+  The kernel was built by: gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
+  You are using:           gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0
+  CC [M]  /home/dev/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver/src/nv_imx708.o
+  MODPOST /home/dev/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver/src/Module.symvers
+  CC [M]  /home/dev/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver/src/nv_imx708.mod.o
+  LD [M]  /home/dev/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver/src/nv_imx708.ko
+make[1]: Leaving directory '/usr/src/linux-headers-5.15.148-tegra-ubuntu22.04_aarch64/3rdparty/canonical/linux-jammy/kernel-source'
+[INFO] Kernel module built successfully: src/nv_imx708.ko
+
+[INFO] Building device tree overlay...
+Building device tree overlay...
+dtc -O dtb -o tegra234-camera-imx708-orin-nano.dtbo -@ dts/tegra234-camera-imx708-orin-nano.dts
+dts/tegra234-camera-imx708-orin-nano.dts:66.34-71.9: Warning (unit_address_vs_reg): /fragment@1/__overlay__/channel@0/ports/port@0/endpoint@0: node has a unit name, but no reg or ranges property
+dts/tegra234-camera-imx708-orin-nano.dts:76.35-79.9: Warning (unit_address_vs_reg): /fragment@1/__overlay__/channel@0/ports/port@1/endpoint@1: node has a unit name, but no reg or ranges property
+dts/tegra234-camera-imx708-orin-nano.dts:32.10-45.6: Warning (graph_child_address): /fragment@0/__overlay__/ports: graph node has single child node 'port@0', #address-cells/#size-cells are not necessary
+dts/tegra234-camera-imx708-orin-nano.dts:149.11-161.7: Warning (graph_child_address): /fragment@2/__overlay__/rbpcv3_imx708_a@1a/ports: graph node has single child node 'port@0', #address-cells/#size-cells are not necessary
+Built: tegra234-camera-imx708-orin-nano.dtbo
+[INFO] Device tree overlay built: tegra234-camera-imx708-orin-nano.dtbo
+
+==========================================
+[INFO] Build completed successfully!
+
+Next steps:
+  1. Install: ./build.sh install
+  2. Or run: sudo make install
+==========================================
+dev@dev-desktop:~/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver$ sudo ./build.sh install
+==========================================
+IMX708 Camera Driver Build Script
+JetPack 6.2 (L4T R36.4.x)
+==========================================
+
+[INFO] Detected Jetson platform:
+# R36 (release), REVISION: 4.7, GCID: 42132812, BOARD: generic, EABI: aarch64, DATE: Thu Sep 18 22:54:44 UTC 2025
+# KERNEL_VARIANT: oot
+TARGET_USERSPACE_LIB_DIR=nvidia
+TARGET_USERSPACE_LIB_DIR_PATH=usr/lib/aarch64-linux-gnu/nvidia
+[INFO] Checking dependencies...
+[INFO] NVIDIA OOT headers found at /usr/src/nvidia/nvidia-oot/
+[INFO] NVIDIA OOT Module.symvers found
+[INFO] All dependencies satisfied
+[INFO] Installing IMX708 driver...
+Building kernel module for kernel 5.15.148-tegra...
+make -C /lib/modules/5.15.148-tegra/build M=/home/dev/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver/src \
+	NVIDIA_OOT_SRC=/usr/src/nvidia/nvidia-oot \
+	NVIDIA_SRC=/usr/src/nvidia \
+	KBUILD_EXTRA_SYMBOLS=/usr/src/nvidia/nvidia-oot/Module.symvers \
+	modules
+make[1]: Entering directory '/usr/src/linux-headers-5.15.148-tegra-ubuntu22.04_aarch64/3rdparty/canonical/linux-jammy/kernel-source'
+warning: the compiler differs from the one used to build the kernel
+  The kernel was built by: gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
+  You are using:           gcc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0
+make[1]: Leaving directory '/usr/src/linux-headers-5.15.148-tegra-ubuntu22.04_aarch64/3rdparty/canonical/linux-jammy/kernel-source'
+Installing IMX708 driver...
+Creating module directory: /lib/modules/5.15.148-tegra/updates/drivers/media/i2c
+sudo mkdir -p /lib/modules/5.15.148-tegra/updates/drivers/media/i2c
+Installing kernel module...
+sudo cp src/nv_imx708.ko /lib/modules/5.15.148-tegra/updates/drivers/media/i2c/
+Installing device tree overlay...
+sudo cp tegra234-camera-imx708-orin-nano.dtbo /boot/
+Updating module dependencies...
+sudo depmod -a
+Creating module autoload config...
+echo "nv_imx708" | sudo tee /etc/modules-load.d/imx708.conf > /dev/null
+
+=============================================
+Installation complete!
+
+IMPORTANT: You must configure the bootloader to load the overlay.
+Edit /boot/extlinux/extlinux.conf and add after the FDT line:
+      OVERLAYS /boot/tegra234-camera-imx708-orin-nano.dtbo
+
+Then reboot: sudo reboot
+=============================================
+dev@dev-desktop:~/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver$ sudo ./apply_overlay.sh 
+=== IMX708 Device Tree Overlay Application ===
+
+Overlay: /boot/tegra234-camera-imx708-orin-nano.dtbo (4778 bytes)
+
+----------------------------------------
+Checking: /boot/kernel_tegra234-p3768-0000+p3767-0005-nv-super.dtb
+  Found: 252699 bytes
+  Backup exists: /boot/kernel_tegra234-p3768-0000+p3767-0005-nv-super.dtb.backup (249353 bytes)
+  Applying overlay...
+
+Failed to apply '/boot/tegra234-camera-imx708-orin-nano.dtbo': FDT_ERR_NOTFOUND
+  ERROR: fdtoverlay failed
+  Restoring backup...
+
+----------------------------------------
+Checking: /boot/dtb/kernel_tegra234-p3768-0000+p3767-0005-nv-super.dtb
+  Found: 252699 bytes
+  Backup exists: /boot/dtb/kernel_tegra234-p3768-0000+p3767-0005-nv-super.dtb.backup (249353 bytes)
+  Applying overlay...
+
+Failed to apply '/boot/tegra234-camera-imx708-orin-nano.dtbo': FDT_ERR_NOTFOUND
+  ERROR: fdtoverlay failed
+  Restoring backup...
+
+========================================
+
+ERROR: Failed to apply overlay to any DTB location!
+dev@dev-desktop:~/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver$ ls
+apply_overlay.sh      logs10.txt  logs6.txt
+build.sh              logs12.txt  logs7.txt
+check_boot_config.sh  logs13.txt  logs8.txt
+check_camera.sh       logs14.txt  logs9.txt
+check_dt.sh           logs15.txt  logs.txt
+diagnose_dtb.sh       logs16.txt  Makefile
+diagnose_hw.sh        logs17.txt  README.md
+diagnose_i2c.sh       logs18.txt  src
+diagnose_power.sh     logs2.txt   tegra234-camera-imx708-orin-nano.dtbo
+dts                   logs3.txt   validate.sh
+fix_extlinux.sh       logs4.txt
+include               logs5.txt
+dev@dev-desktop:~/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver$ ls /sys/firmware/devicetree/base/ | grep -i cam
+camera-ivc-channels
+tegra-camera-platform
+dev@dev-desktop:~/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver$ find /sys/firmware/devicetree/base -name "*i2c*" -type d 2>/dev/null | head -20
+/sys/firmware/devicetree/base/bus@0/i2c@3160000
+/sys/firmware/devicetree/base/bus@0/i2c@31e0000
+/sys/firmware/devicetree/base/bus@0/i2c@31b0000
+/sys/firmware/devicetree/base/bus@0/i2c@c240000
+/sys/firmware/devicetree/base/bus@0/i2c@3180000
+/sys/firmware/devicetree/base/bus@0/i2c@31c0000
+/sys/firmware/devicetree/base/bus@0/i2c@c250000
+/sys/firmware/devicetree/base/bus@0/i2c@3190000
+/sys/firmware/devicetree/base/bpmp/i2c
+dev@dev-desktop:~/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver$ ls -la /sys/bus/i2c/devices/
+total 0
+drwxr-xr-x 2 root root 0 Aug 26 11:23 .
+drwxr-xr-x 4 root root 0 Aug 26 11:23 ..
+lrwxrwxrwx 1 root root 0 Aug 26 11:23 0-0050 -> ../../../devices/platform/bus@0/3160000.i2c/i2c-0/0-0050
+lrwxrwxrwx 1 root root 0 Aug 26 11:23 0-0057 -> ../../../devices/platform/bus@0/3160000.i2c/i2c-0/0-0057
+lrwxrwxrwx 1 root root 0 Aug 26 11:23 1-0025 -> ../../../devices/platform/bus@0/c240000.i2c/i2c-1/1-0025
+lrwxrwxrwx 1 root root 0 Aug 26 11:23 1-0040 -> ../../../devices/platform/bus@0/c240000.i2c/i2c-1/1-0040
+lrwxrwxrwx 1 root root 0 Nov 28 12:36 2-001a -> ../../../devices/platform/bus@0/3180000.i2c/i2c-2/2-001a
+lrwxrwxrwx 1 root root 0 Aug 26 11:23 4-003c -> ../../../devices/platform/bpmp/bpmp:i2c/i2c-4/4-003c
+lrwxrwxrwx 1 root root 0 Aug 26 11:23 i2c-0 -> ../../../devices/platform/bus@0/3160000.i2c/i2c-0
+lrwxrwxrwx 1 root root 0 Aug 26 11:23 i2c-1 -> ../../../devices/platform/bus@0/c240000.i2c/i2c-1
+lrwxrwxrwx 1 root root 0 Nov 28 13:03 i2c-2 -> ../../../devices/platform/bus@0/3180000.i2c/i2c-2
+lrwxrwxrwx 1 root root 0 Aug 26 11:23 i2c-4 -> ../../../devices/platform/bpmp/bpmp:i2c/i2c-4
+lrwxrwxrwx 1 root root 0 Aug 26 11:23 i2c-5 -> ../../../devices/platform/bus@0/31b0000.i2c/i2c-5
+lrwxrwxrwx 1 root root 0 Aug 26 11:23 i2c-7 -> ../../../devices/platform/bus@0/c250000.i2c/i2c-7
+lrwxrwxrwx 1 root root 0 Nov 28 12:31 i2c-9 -> ../../../devices/platform/13800000.display/i2c-9
+dev@dev-desktop:~/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver$ cat /sys/bus/i2c/devices/i2c-*/name 2>/dev/null
+3160000.i2c
+c240000.i2c
+3180000.i2c
+Tegra BPMP I2C adapter
+31b0000.i2c
+c250000.i2c
+NVIDIA SOC i2c adapter 0
+
