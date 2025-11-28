@@ -8,52 +8,44 @@ between mainline Linux and JetPack kernels.
 
 **Fix**: Changed `reset-gpios = <&gpio 62 1>` to `reset-gpios = <&gpio 49 1>`
 
-## Step 1: Pull the Fix
+---
+
+## Quick Start
 
 ```bash
+# 1. Pull the fix
 cd ~/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver
 git pull
-```
 
-## Step 2: Rebuild Driver and DTBO
-
-```bash
+# 2. Rebuild and install
 ./build.sh
-```
-
-## Step 3: Install
-
-```bash
 sudo ./build.sh install
-```
 
-## Step 4: Re-apply Overlay to DTB Files
-
-```bash
-# Apply to kernel_ prefixed DTB
+# 3. Re-apply overlay to DTBs
 sudo fdtoverlay -i /boot/kernel_tegra234-p3768-0000+p3767-0005-nv-super.dtb.backup -o /boot/kernel_tegra234-p3768-0000+p3767-0005-nv-super.dtb /boot/tegra234-camera-imx708-orin-nano.dtbo
 
-# Apply to non-prefixed DTB
 sudo fdtoverlay -i /boot/tegra234-p3768-0000+p3767-0005-nv-super.dtb.backup -o /boot/tegra234-p3768-0000+p3767-0005-nv-super.dtb /boot/tegra234-camera-imx708-orin-nano.dtbo
-```
 
-## Step 5: Reboot
-
-```bash
+# 4. Reboot
 sudo reboot
 ```
 
 ---
 
-## Verification Commands (After Reboot)
-
-### Check I2C Detection
+## Verification (After Reboot)
 
 ```bash
+# Check I2C - should show device at 0x1a
 sudo i2cdetect -y -r 2
+
+# Check video device - should show /dev/video0
+ls /dev/video*
+
+# Check kernel messages - should show successful probe
+sudo dmesg | grep -i imx708
 ```
 
-**Expected**: Device at address `1a` should appear:
+**Expected I2C output**:
 ```
      0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
 00:                         -- -- -- -- -- -- -- --
@@ -61,43 +53,9 @@ sudo i2cdetect -y -r 2
 ...
 ```
 
-### Check GPIO State
-
-```bash
-sudo cat /sys/kernel/debug/gpio | grep -iE "PH.06|gpio-397"
-```
-
-### Check Video Device
-
-```bash
-ls /dev/video*
-```
-
-**Expected**: `/dev/video0` should exist.
-
-### Check Kernel Messages
-
-```bash
-sudo dmesg | grep -i imx708
-```
-
-**Expected**: Should show successful probe messages, no errors.
-
-### Check Device Tree Node
-
-```bash
-ls /sys/firmware/devicetree/base/bus@0/i2c@3180000/rbpcv3_imx708_a@1a/
-```
-
-### Full Diagnostic
-
-```bash
-./diagnose_full.sh
-```
-
 ---
 
-## Test Camera with GStreamer
+## Test Camera
 
 ```bash
 SENSOR_ID=0
@@ -118,23 +76,33 @@ gst-launch-1.0 -e nvarguscamerasrc sensor-id=$SENSOR_ID ! \
 
 ## Troubleshooting
 
-### Camera still not detected on I2C
+### Camera not detected on I2C
 
 1. Power cycle the Jetson (full shutdown, not just reboot)
 2. Check cable orientation: blue stripe UP on Jetson side, contacts DOWN
 3. Try a different ribbon cable
 4. Verify camera connector latches are fully closed
 
-### GPIO not toggling
+### Check GPIO state
 
-Check if GPIO 62 is being controlled:
 ```bash
-sudo cat /sys/kernel/debug/gpio | grep -A5 -B5 "gpiochip0"
+sudo cat /sys/kernel/debug/gpio | grep -iE "PH.06|gpio-397"
 ```
 
-### Device tree node missing
+### Check device tree overlay applied
 
-Verify DTB has overlay applied:
 ```bash
 dtc -I dtb -O dts /boot/kernel_tegra234-p3768-0000+p3767-0005-nv-super.dtb 2>/dev/null | grep -i imx708
+```
+
+### Check device tree node exists
+
+```bash
+ls /sys/firmware/devicetree/base/bus@0/i2c@3180000/rbpcv3_imx708_a@1a/
+```
+
+### Full diagnostic
+
+```bash
+./diagnose_full.sh
 ```
