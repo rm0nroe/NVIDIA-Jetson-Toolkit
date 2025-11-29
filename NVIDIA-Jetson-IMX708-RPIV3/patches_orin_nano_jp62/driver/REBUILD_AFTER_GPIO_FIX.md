@@ -1,33 +1,32 @@
-# IMX708 Driver Rebuild After GPIO Fix
+# IMX708 Driver for JetPack 6.2
 
-The reset GPIO was incorrectly set using mainline Linux GPIO offset formula (7*8+6=62).
-JetPack 6.2/L4T 36.4 uses different GPIO port offsets - PH.06 (CAM0_PWDN) is at offset **49**, not 62.
+## IMPORTANT: CAM1 Port Only
 
-**Root Cause**: NVIDIA has [conflicting tegra234-gpio.h definitions](https://forums.developer.nvidia.com/t/conflicting-tegra234-gpio-defs/262485)
-between mainline Linux and JetPack kernels.
+**JetPack 6.2 only supports the IMX708 camera on the CAM1 port, NOT CAM0.**
 
-**Fix**: Changed `reset-gpios = <&gpio 62 1>` to `reset-gpios = <&gpio 49 1>`
+Connect your camera ribbon cable to the **CAM1** connector on the Jetson Orin Nano.
 
 ---
 
 ## Quick Start
 
 ```bash
-# 1. Pull the fix
+# 1. Pull latest changes
 cd ~/dev/Nvidia-Jetson-Toolkit/NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/driver
 git pull
 
-# 2. Rebuild and install
+# 2. Clean previous build (important when switching ports)
+./build.sh clean
+
+# 3. Build and install (defaults to CAM1)
 ./build.sh
 sudo ./build.sh install
 
-# 3. Re-apply overlay to DTBs
-sudo fdtoverlay -i /boot/kernel_tegra234-p3768-0000+p3767-0005-nv-super.dtb.backup -o /boot/kernel_tegra234-p3768-0000+p3767-0005-nv-super.dtb /boot/tegra234-camera-imx708-orin-nano.dtbo
-
-sudo fdtoverlay -i /boot/tegra234-p3768-0000+p3767-0005-nv-super.dtb.backup -o /boot/tegra234-p3768-0000+p3767-0005-nv-super.dtb /boot/tegra234-camera-imx708-orin-nano.dtbo
-
-# 4. Reboot
-sudo reboot
+# 4. Configure CSI connector with jetson-io
+cd /opt/nvidia/jetson-io/
+sudo python3 jetson-io.py
+# Select "Camera IMX477-C" (C = CAM1 port)
+# Save and reboot
 ```
 
 ---
@@ -35,17 +34,17 @@ sudo reboot
 ## Verification (After Reboot)
 
 ```bash
-# Check I2C - should show device at 0x1a
-sudo i2cdetect -y -r 2
+# Check I2C - camera should appear at 0x1a
+sudo i2cdetect -y -r 9
 
-# Check video device - should show /dev/video0
+# Check video device
 ls /dev/video*
 
-# Check kernel messages - should show successful probe
+# Check kernel messages
 sudo dmesg | grep -i imx708
 ```
 
-**Expected I2C output**:
+**Expected I2C output** (bus 9 for CAM1):
 ```
      0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
 00:                         -- -- -- -- -- -- -- --
@@ -74,31 +73,59 @@ gst-launch-1.0 -e nvarguscamerasrc sensor-id=$SENSOR_ID ! \
 
 ---
 
+## Alternative: Arducam Official Installer
+
+Arducam provides an official installer for IMX708 on JetPack 6.2:
+
+```bash
+cd ~
+wget https://github.com/ArduCAM/MIPI_Camera/releases/download/v0.0.3/install_full.sh
+chmod +x install_full.sh
+./install_full.sh -m imx708
+```
+
+**Note**: Only CAM1 port is supported.
+
+---
+
+## Technical Notes
+
+### Why CAM1 Only?
+
+Per Arducam's compatibility matrix, JetPack 6.2 (L4T 36.4.x) only supports the IMX708 on the CAM1 port. This is a platform limitation.
+
+### Port Mapping
+
+| Port | CSI Interface | I2C Bus | jetson-io Selection |
+|------|---------------|---------|---------------------|
+| CAM0 | serial_a | Bus 2 | IMX477-A |
+| CAM1 | serial_c | Bus 9 (via cam_i2cmux) | IMX477-C |
+
+### GPIO Configuration
+
+The device tree uses GPIO 62 with active-high polarity, matching NVIDIA's jetson-io IMX477-C configuration.
+
+---
+
 ## Troubleshooting
 
 ### Camera not detected on I2C
 
-1. Power cycle the Jetson (full shutdown, not just reboot)
-2. Check cable orientation: blue stripe UP on Jetson side, contacts DOWN
-3. Try a different ribbon cable
-4. Verify camera connector latches are fully closed
+1. Verify camera is connected to **CAM1** (not CAM0)
+2. Run jetson-io and select **"Camera IMX477-C"**
+3. Power cycle the Jetson (full shutdown, not just reboot)
+4. Check cable orientation: contacts facing the board
 
 ### Check GPIO state
 
 ```bash
-sudo cat /sys/kernel/debug/gpio | grep -iE "PH.06|gpio-397"
+sudo cat /sys/kernel/debug/gpio | grep -iE "gpio-62|PJ"
 ```
 
-### Check device tree overlay applied
+### Check device tree
 
 ```bash
-dtc -I dtb -O dts /boot/kernel_tegra234-p3768-0000+p3767-0005-nv-super.dtb 2>/dev/null | grep -i imx708
-```
-
-### Check device tree node exists
-
-```bash
-ls /sys/firmware/devicetree/base/bus@0/i2c@3180000/rbpcv3_imx708_a@1a/
+sudo dtc -I fs -O dts /proc/device-tree 2>/dev/null | grep -A10 "imx708\|imx477"
 ```
 
 ### Full diagnostic

@@ -24,9 +24,17 @@ NVIDIA_SRC ?= /usr/src/nvidia
 MODULE_INSTALL_DIR := /lib/modules/$(KERNEL_VER)/updates/drivers/media/i2c
 DTBO_INSTALL_DIR := /boot
 
-# Device tree source
-DTS_FILE := dts/tegra234-camera-imx708-orin-nano.dts
-DTBO_FILE := tegra234-camera-imx708-orin-nano.dtbo
+# Camera port selection: CAM0 or CAM1 (default: CAM1 for JetPack 6.2)
+CAM_PORT ?= CAM1
+
+# Device tree source based on camera port
+ifeq ($(CAM_PORT),CAM1)
+    DTS_FILE := dts/tegra234-camera-imx708-orin-nano-cam1.dts
+    DTBO_FILE := tegra234-camera-imx708-orin-nano-cam1.dtbo
+else
+    DTS_FILE := dts/tegra234-camera-imx708-orin-nano.dts
+    DTBO_FILE := tegra234-camera-imx708-orin-nano.dtbo
+endif
 
 PWD := $(shell pwd)
 
@@ -122,10 +130,17 @@ help:
 	@echo "  help      - Show this help message"
 	@echo ""
 	@echo "Variables:"
+	@echo "  CAM_PORT       - Camera port: CAM0 or CAM1 (default: CAM1)"
+	@echo "                   NOTE: JetPack 6.2 only supports CAM1 for IMX708!"
 	@echo "  KERNEL_VER     - Kernel version (default: $(KERNEL_VER))"
 	@echo "  KERNEL_SRC     - Kernel source/headers path (default: $(KERNEL_SRC))"
 	@echo "  NVIDIA_OOT_SRC - NVIDIA out-of-tree source path (default: $(NVIDIA_OOT_SRC))"
 	@echo "  NVIDIA_SRC     - NVIDIA source path (default: $(NVIDIA_SRC))"
+	@echo ""
+	@echo "Examples:"
+	@echo "  make                    - Build for CAM1 (default, recommended)"
+	@echo "  make CAM_PORT=CAM0      - Build for CAM0 (not supported on JP6.2)"
+	@echo "  make install            - Build and install for CAM1"
 	@echo ""
 	@echo "Required packages:"
 	@echo "  nvidia-l4t-kernel-headers     - Kernel headers for module compilation"

@@ -5,8 +5,14 @@
 #
 # Usage: ./build.sh [clean|install|uninstall]
 #
+# NOTE: JetPack 6.2 only supports CAM1 port for IMX708!
+#       Camera must be connected to CAM1, not CAM0.
+#
 
 set -e
+
+# Default to CAM1 for JetPack 6.2
+export CAM_PORT="${CAM_PORT:-CAM1}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
@@ -147,9 +153,17 @@ check_dependencies() {
 
 # Build the driver
 do_build() {
+    echo_info "Building for camera port: $CAM_PORT"
     echo_info "Kernel version: $(uname -r)"
     echo_info "Kernel headers: /lib/modules/$(uname -r)/build"
     echo ""
+
+    # Determine DTBO filename based on CAM_PORT
+    if [ "$CAM_PORT" = "CAM1" ]; then
+        DTBO_FILE="tegra234-camera-imx708-orin-nano-cam1.dtbo"
+    else
+        DTBO_FILE="tegra234-camera-imx708-orin-nano.dtbo"
+    fi
 
     echo_info "Building kernel module..."
     make modules
@@ -165,8 +179,8 @@ do_build() {
     echo_info "Building device tree overlay..."
     make dtbo
 
-    if [ -f "tegra234-camera-imx708-orin-nano.dtbo" ]; then
-        echo_info "Device tree overlay built: tegra234-camera-imx708-orin-nano.dtbo"
+    if [ -f "$DTBO_FILE" ]; then
+        echo_info "Device tree overlay built: $DTBO_FILE"
     else
         echo_error "Device tree overlay build failed"
         exit 1
@@ -191,10 +205,17 @@ do_clean() {
 
 # Install the driver
 do_install() {
-    echo_info "Installing IMX708 driver..."
+    echo_info "Installing IMX708 driver for $CAM_PORT..."
+
+    # Determine DTBO filename based on CAM_PORT
+    if [ "$CAM_PORT" = "CAM1" ]; then
+        DTBO_FILE="tegra234-camera-imx708-orin-nano-cam1.dtbo"
+    else
+        DTBO_FILE="tegra234-camera-imx708-orin-nano.dtbo"
+    fi
 
     # Check if built
-    if [ ! -f "src/nv_imx708.ko" ] || [ ! -f "tegra234-camera-imx708-orin-nano.dtbo" ]; then
+    if [ ! -f "src/nv_imx708.ko" ] || [ ! -f "$DTBO_FILE" ]; then
         echo_warn "Build artifacts not found, building first..."
         do_build
     fi
