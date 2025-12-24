@@ -1,120 +1,182 @@
-# NVIDIA Jetson IMX708 RPI V3 camera driver
-This driver has been developed by RidgeRun Engineering as an initiative in order to release the first version of the Sony IMX708 sensor driver for the Raspberry Pi Camera Module 3.
+# NVIDIA Jetson Camera Toolkit
 
-Supports the following Jetson platforms:
-* Jetson Orin Nano
-* Jetson Nano
+A comprehensive toolkit for setting up cameras on NVIDIA Jetson platforms, with a focus on the **Arducam IMX708** on **Jetson Orin Nano Super** with **JetPack 6.2**.
 
-## Repository structure
+## Overview
 
-In this repository you will find the following structure:
-```
-.
-├── patches_nano
-│   └── patches
-│       ├── 4.6.4_nano_imx708_v0.1.0.patch
-│       └── series
-├── patches_orin_nano
-│   └── patches
-│       ├── 5.1.1_nano_imx708_v0.1.0.patch
-│       ├── 6.0_orin_nano_imx708_v0.1.0.patch
-│       └── series
-└── README.md
-```
-where:
+Getting third-party cameras working on Jetson can be challenging. This toolkit provides:
 
-* `5.1.1_nano_imx708-v0.1.0.patch` is the patch to be applied on the JetPack 5.1.1 sources in order to add support for the IMX708 camera sensor in the Jetson Orin Nano.
-* `6.0_orin_nano_imx708-v0.1.0.patch` is the patch to be applied on the JetPack 6.0 sources in order to add support for the IMX708 camera sensor in the Jetson Orin Nano.
-* `4.6.4_nano_imx708-v0.1.0.patch` is the patch to be applied on the JetPack 4.6.4 sources in order to add support for the IMX708 camera sensor in the Jetson Nano.
-* `series` is a file containing the patch name in order to apply it by using the quilt tool. JetPack 6.0 patch uses git to apply the patch.
+- **Working device tree overlays** tested on real hardware
+- **Step-by-step installation guides** with troubleshooting
+- **Python integration examples** for computer vision applications
+- **Key learnings** from extensive debugging sessions
 
-## JetPack installation instructions
+## Supported Configurations
 
-You can download and install the JetPack by following the instructions below:
+| Camera | Platform | JetPack | Status |
+|--------|----------|---------|--------|
+| Arducam IMX708 12MP | Orin Nano Super | 6.2 (L4T R36.4.3) | ✅ Working |
+| Arducam IMX708 12MP | Orin Nano | 6.2 (L4T R36.4.3) | ✅ Working |
+| Arducam IMX708 12MP | Orin Nano | 6.0, 5.1.1 | See RidgeRun docs |
+| Arducam IMX708 12MP | Jetson Nano | 4.6.4 | See RidgeRun docs |
 
-* [JetPack download and installation instructions](https://developer.ridgerun.com/wiki/index.php/Raspberry_Pi_Camera_Module_3_IMX708_Linux_driver_for_Jetson#Download_JetPack)
+## Quick Start
 
-## Driver Installation instructions
+### IMX708 on JetPack 6.2
 
-There are two options to install the driver:
+1. **Read the guide**: [docs/jp-6.2/imx708_driver_install.md](docs/jp-6.2/imx708_driver_install.md)
+2. **Get the driver**: Use `NVIDIA-Jetson-IMX708-RPIV3/patches_orin_nano_jp62/`
+3. **Apply the overlay**: Use `docs/jp-6.2/overlays/imx708-nvidia-csi.dts`
 
-### OPTION A: Installing the kernel and dtb debians (Recommended)
-
-**Note:** JetPack 6.0 is not supported using this method.
-
-This is the easiest and fastest way to install the driver. In order to install the debian packages you just need to perform the following instructions:
-
-* [Installing debians](https://developer.ridgerun.com/wiki/index.php/Raspberry_Pi_Camera_Module_3_IMX708_Linux_driver_for_Jetson#Installing_the_Driver_-_Option_A:_Debian_Packages_.28Recommended.29)
-
-### OPTION B: Applying the patches on the sources
-
-In order to apply the patch on the JetPack sources with Orin Nano and Nano support, you must perform the following instructions:
-#### For Jetson Orin Nano ####
-* [Install required software](https://developer.ridgerun.com/wiki/index.php/Raspberry_Pi_Camera_Module_3_IMX708_Linux_driver_for_Jetson#Install_dependencies)
-* [JetPack sources download instructions](https://developer.ridgerun.com/wiki/index.php/Raspberry_Pi_Camera_Module_3_IMX708_Linux_driver_for_Jetson#Get_the_source_code_from_NVIDIA_oficial_repository)
-* [Patch instructions](https://developer.ridgerun.com/wiki/index.php/Raspberry_Pi_Camera_Module_3_IMX708_Linux_driver_for_Jetson#Get_the_driver_patches)
-* [Setup toolchain](https://developer.ridgerun.com/wiki/index.php/Raspberry_Pi_Camera_Module_3_IMX708_Linux_driver_for_Jetson#Set_up_the_toolchain)
-* [Kernel build instructions](https://developer.ridgerun.com/wiki/index.php/Raspberry_Pi_Camera_Module_3_IMX708_Linux_driver_for_Jetson#Build)
-* [Flash the Jetson](https://developer.ridgerun.com/wiki/index.php/Raspberry_Pi_Camera_Module_3_IMX708_Linux_driver_for_Jetson#Installation_options)
-#### For Jetson Nano ####
-* [Install required software](https://developer.ridgerun.com/wiki/index.php/Raspberry_Pi_Camera_Module_3_IMX708_Linux_driver_for_Jetson#Install_dependencies)
-* [JetPack sources download instructions](https://developer.ridgerun.com/wiki/index.php/Raspberry_Pi_Camera_Module_3_IMX708_Linux_driver_for_Jetson#Get_the_source_code_from_NVIDIA_oficial_repository)
-* [Patch instructions](https://developer.ridgerun.com/wiki/index.php/Raspberry_Pi_Camera_Module_3_IMX708_Linux_driver_for_Jetson#Get_the_driver_patches_2)
-* [Setup toolchain](https://developer.ridgerun.com/wiki/index.php/Raspberry_Pi_Camera_Module_3_IMX708_Linux_driver_for_Jetson#Set_up_the_toolchain_2)
-* [Kernel build instructions](https://developer.ridgerun.com/wiki/index.php/Raspberry_Pi_Camera_Module_3_IMX708_Linux_driver_for_Jetson#Build_2)
-* [Flash the Jetson](https://developer.ridgerun.com/wiki/index.php/Raspberry_Pi_Camera_Module_3_IMX708_Linux_driver_for_Jetson#Installation_options_2)
-
-## Supported features
-
-### Resolutions and framerates
-
-* 4608x2592 @ 14fps
-
-### Controls
-
-* Gain
-* Exposure
-* Framerate
-* Group Hold
-
-## Example pipelines
-
-### Display
-
-* 4608x2592
-
-```
-SENSOR_ID=0 # 0 for CAM0 port
-FRAMERATE=14 # Framerate can go from 2 to 14 for 4608x2592 mode
-gst-launch-1.0 nvarguscamerasrc sensor-id=$SENSOR_ID ! "video/x-raw(memory:NVMM),width=4608,height=2592,framerate=$FRAMERATE/1" ! queue ! nvegltransform ! nveglglessink 
+```bash
+# Quick verification after setup
+ls /dev/video0
+v4l2-ctl -d /dev/video0 --info
 ```
 
-
-### MP4 Recording
-
-* 4608x2592
+## Repository Structure
 
 ```
-SENSOR_ID=0 # 0 for CAM0 port
-FRAMERATE=14 # Framerate can go from 2 to 14 for 4608x2592 mode
-gst-launch-1.0 -e nvarguscamerasrc sensor-id=$SENSOR_ID ! "video/x-raw(memory:NVMM),width=4608,height=2592,framerate=$FRAMERATE/1" ! nvv4l2h264enc ! h264parse ! mp4mux ! filesink location=rpi_v3_imx708_cam$SENSOR_ID.mp4
+Nvidia-Jetson-Toolkit/
+├── README.md                          # This file
+├── docs/
+│   ├── jetson-ssh-setup.md           # SSH configuration guide
+│   └── jp-6.2/                       # JetPack 6.2 specific docs
+│       ├── imx708_driver_install.md  # Complete IMX708 guide
+│       ├── hardware_setup_checklist.md
+│       └── overlays/
+│           └── imx708-nvidia-csi.dts # Working device tree overlay
+└── NVIDIA-Jetson-IMX708-RPIV3/       # RidgeRun driver source
+    ├── patches_orin_nano_jp62/       # JetPack 6.2 patches
+    │   └── driver/                   # Kernel module source
+    ├── patches_orin_nano/            # JetPack 5.x/6.0 patches
+    ├── patches_nano/                 # Jetson Nano patches
+    └── README.md                     # RidgeRun original docs
 ```
 
-### JPEG snapshots
+## Key Findings (JetPack 6.2)
 
-* 4608x2592
+After extensive testing, we discovered several critical insights:
 
+### What Works
+
+| Component | Configuration |
+|-----------|---------------|
+| Driver | RidgeRun `nv_imx708.ko` with `sony,imx708` compatible |
+| Device Tree | Custom overlay merged with `fdtoverlay` |
+| Capture | `v4l2-ctl --stream-mmap` for raw Bayer |
+| Processing | Python + OpenCV with percentile normalization |
+
+### What Does NOT Work on JetPack 6.2
+
+| Approach | Problem |
+|----------|---------|
+| `jetson-io` IMX477-C mode | Capture timeouts |
+| `nvarguscamerasrc` | Requires missing ISP tuning files |
+| OVERLAYS in extlinux.conf | UEFI boot ignores runtime overlays |
+| RidgeRun's original CSI params | Wrong `discontinuous_clk` and `lane_polarity` |
+
+### Critical CSI Parameters
+
+The breakthrough was using NVIDIA's CSI parameters instead of RidgeRun's defaults:
+
+| Parameter | RidgeRun (FAILS) | NVIDIA (WORKS) |
+|-----------|------------------|----------------|
+| `discontinuous_clk` | `"yes"` | `"no"` |
+| `lane_polarity` | `"6"` | `"0"` |
+| `channel` | `channel@1` | `channel@0` |
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [IMX708 Driver Install (JP6.2)](docs/jp-6.2/imx708_driver_install.md) | Complete installation guide with troubleshooting |
+| [Hardware Setup Checklist](docs/jp-6.2/hardware_setup_checklist.md) | Pre-installation checklist |
+| [SSH Setup](docs/jetson-ssh-setup.md) | Configure SSH access to Jetson |
+| [RidgeRun Driver Docs](NVIDIA-Jetson-IMX708-RPIV3/README.md) | Original driver documentation |
+
+## Sample Output
+
+When everything is working correctly:
+
+```bash
+$ v4l2-ctl -d /dev/video0 --info
+Driver Info:
+        Driver name      : tegra-video
+        Card type        : vi-output, imx708 9-001a
+        Bus info         : platform:tegra-capture-vi:1
+
+$ sudo dmesg | grep imx708
+imx708 9-001a: tegracam sensor driver:imx708_v2.0.6
+imx708 9-001a: detected imx708 sensor
 ```
-SENSOR_ID=0 # 0 for CAM0 port
-FRAMERATE=60 # Framerate can go from 2 to 14 for 4608x2592 mode
-NUMBER_OF_SNAPSHOTS=20
-gst-launch-1.0 -e nvarguscamerasrc num-buffers=$NUMBER_OF_SNAPSHOTS sensor-id=$SENSOR_ID ! "video/x-raw(memory:NVMM),width=4608,height=2592,framerate=$FRAMERATE/1" ! nvjpegenc ! multifilesink location=%03d_rpi_v3_imx708_cam$SENSOR_ID.jpeg
+
+## Capture Example
+
+```python
+import subprocess
+import numpy as np
+import cv2
+
+# Capture raw frame
+subprocess.run([
+    "v4l2-ctl", "-d", "/dev/video0",
+    "--set-fmt-video=width=4608,height=2592,pixelformat=RG10",
+    "--stream-mmap", "--stream-count=1",
+    "--stream-to=/tmp/frame.raw"
+])
+
+# Process raw Bayer to color
+raw = np.fromfile("/tmp/frame.raw", dtype=np.uint16)
+img = raw[:4608*2592].reshape((2592, 4608))
+p2, p98 = np.percentile(img, [2, 98])
+img_norm = np.clip((img.astype(float) - p2) / (p98 - p2) * 255, 0, 255).astype(np.uint8)
+color = cv2.cvtColor(img_norm, cv2.COLOR_BAYER_RG2BGR)
+cv2.imwrite("/tmp/capture.jpg", color)
 ```
 
+## Specifications
 
-## RidgeRun
+| Parameter | Value |
+|-----------|-------|
+| Sensor | Sony IMX708 |
+| Resolution | 4608 x 2592 (12MP) |
+| Frame Rate | 14 fps (max at full resolution) |
+| Pixel Format | RG10 (10-bit Bayer RGRG/GBGB) |
+| Interface | CSI-2, 2 lanes |
+| I2C Address | 0x1a |
 
-Check our other products in [ridgerun.com](https://www.ridgerun.com) and don't hesitate to contact us if you have any kind of problem with the instructions given by reaching us at https://www.ridgerun.com/contact
+## Credits
 
+### Acknowledgments
 
+- **[RidgeRun](https://ridgerun.com/)** - For the `nv_imx708` driver and excellent Jetson camera support
+- **[NVIDIA](https://developer.nvidia.com/)** - For the Jetson platform and documentation
+- **[Arducam](https://www.arducam.com/)** - For the IMX708 camera module
 
+### Contributors
+
+- Documentation and testing by the AI Companion project team
+
+### License
+
+- RidgeRun driver: GPL v2
+- Documentation: MIT
+
+## Contributing
+
+Found an issue or have improvements?
+
+1. **Open an issue** on this repository
+2. **Submit a pull request** with your changes
+3. **Share your experiences** on the [NVIDIA Developer Forums](https://forums.developer.nvidia.com/)
+
+## Related Projects
+
+- [AI Companion](https://github.com/rm0nroe/ai-companion) - Voice-first AI assistant using this camera setup
+- [RidgeRun IMX708 Driver](https://github.com/RidgeRun/NVIDIA-Jetson-IMX708-RPIV3) - Original driver source
+
+---
+
+**Last Updated**: December 24, 2025
+**Tested On**: Jetson Orin Nano Super 8GB, JetPack 6.2, Arducam IMX708
