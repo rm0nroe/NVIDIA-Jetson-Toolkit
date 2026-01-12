@@ -17,7 +17,7 @@ nvidia-jetson-toolkit/
 │   ├── ssh-setup.md                    # SSH configuration for Jetson
 │   └── overlays/
 │       └── imx708-nvidia-csi.dts       # Working device tree overlay
-└── jp62-imx708-rpiV3/                  # JetPack 6.2 IMX708 driver
+└── jp62-imx708-rpi-v3/                 # JetPack 6.2 IMX708 driver
     └── driver/
         ├── src/                        # Kernel module source
         │   ├── nv_imx708.c
@@ -76,7 +76,7 @@ The breakthrough discovery: use NVIDIA's CSI parameters, not RidgeRun's defaults
 ### Building the Driver
 
 ```bash
-cd jp62-imx708-rpiV3/driver
+cd jp62-imx708-rpi-v3/driver
 ./build.sh        # Build
 ./build.sh install  # Install
 ```
@@ -129,4 +129,4 @@ v4l2-ctl -d /dev/video0 \
 
 - [Installation Guide](docs/installation.md) - Complete setup instructions
 - [SSH Setup](docs/ssh-setup.md) - Remote access configuration
-- [Driver README](jp62-imx708-rpiV3/driver/README.md) - Driver-specific docs
+- [Driver README](jp62-imx708-rpi-v3/driver/README.md) - Driver-specific docs
