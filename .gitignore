@@ -1,0 +1,26 @@
+.DS_Store
+
+# Kernel module build artifacts
+*.o
+*.ko
+*.mod
+*.mod.c
+*.mod.o
+*.symvers
+*.order
+.tmp_versions/
+Module.symvers
+modules.order
+
+# Device tree compiled files
+*.dtb
+*.dtbo
+
+# Editor files
+*.swp
+*.swo
+*~
+
+# Build directories
+build/
+out/
