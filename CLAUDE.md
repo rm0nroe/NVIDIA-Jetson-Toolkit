@@ -9,7 +9,7 @@ NVIDIA Jetson Camera Toolkit - a resource for setting up third-party cameras on 
 ## Repository Structure
 
 ```
-Nvidia-Jetson-Toolkit/
+nvidia-jetson-toolkit/
 ├── README.md                           # Main documentation
 ├── CLAUDE.md                           # This file
 ├── docs/
@@ -17,8 +17,8 @@ Nvidia-Jetson-Toolkit/
 │   ├── ssh-setup.md                    # SSH configuration for Jetson
 │   └── overlays/
 │       └── imx708-nvidia-csi.dts       # Working device tree overlay
-└── NVIDIA-Jetson-IMX708-RPIV3/         # RidgeRun driver source
-    └── driver/                         # JetPack 6.2 driver
+└── jp62-imx708-rpiV3/                  # JetPack 6.2 IMX708 driver
+    └── driver/
         ├── src/                        # Kernel module source
         │   ├── nv_imx708.c
         │   └── imx708_mode_tbls.h
@@ -27,8 +27,12 @@ Nvidia-Jetson-Toolkit/
         ├── dts/                        # Device tree sources
         │   ├── tegra234-camera-imx708-orin-nano.dts
         │   └── tegra234-camera-imx708-orin-nano-cam1.dts
+        ├── scripts/                    # Utility and diagnostic scripts
+        │   ├── validate.sh             # Post-install validation (7 tests)
+        │   ├── diagnose_full.sh        # Comprehensive diagnostic (15 sections)
+        │   ├── apply_overlay.sh        # Apply DTB overlay to boot partition
+        │   └── fix_extlinux.sh         # Fix extlinux.conf bootloader config
         ├── build.sh                    # Build script
-        ├── validate.sh                 # Installation validation
         └── Makefile
 ```
 
@@ -72,7 +76,7 @@ The breakthrough discovery: use NVIDIA's CSI parameters, not RidgeRun's defaults
 ### Building the Driver
 
 ```bash
-cd NVIDIA-Jetson-IMX708-RPIV3/driver
+cd jp62-imx708-rpiV3/driver
 ./build.sh        # Build
 ./build.sh install  # Install
 ```
@@ -125,4 +129,4 @@ v4l2-ctl -d /dev/video0 \
 
 - [Installation Guide](docs/installation.md) - Complete setup instructions
 - [SSH Setup](docs/ssh-setup.md) - Remote access configuration
-- [Driver README](NVIDIA-Jetson-IMX708-RPIV3/driver/README.md) - Driver-specific docs
+- [Driver README](jp62-imx708-rpiV3/driver/README.md) - Driver-specific docs
