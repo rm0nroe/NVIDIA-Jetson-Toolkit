@@ -76,7 +76,7 @@ sudo reboot
 After reboot, run the validation script:
 
 ```bash
-./validate.sh
+./scripts/validate.sh
 ```
 
 Or check manually:
@@ -171,9 +171,13 @@ driver/
 ├── dts/
 │   ├── tegra234-camera-imx708-orin-nano.dts       # CAM0 device tree
 │   └── tegra234-camera-imx708-orin-nano-cam1.dts  # CAM1 device tree
+├── scripts/
+│   ├── validate.sh          # Installation validation (7 tests)
+│   ├── diagnose_full.sh     # Comprehensive diagnostic (15 sections)
+│   ├── apply_overlay.sh     # Apply DTB overlay to boot partition
+│   └── fix_extlinux.sh      # Fix extlinux.conf bootloader config
 ├── Makefile                 # Main build Makefile
 ├── build.sh                 # Build script
-├── validate.sh              # Installation validation
 └── README.md                # This file
 ```
 
@@ -223,7 +227,7 @@ If mismatch, rebuild with correct headers.
 ### Full diagnostic
 
 ```bash
-./diagnose_full.sh
+./scripts/diagnose_full.sh
 ```
 
 ### nvarguscamerasrc fails
