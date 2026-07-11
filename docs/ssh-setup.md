@@ -1,17 +1,18 @@
-# Jetson Orin Nano SSH Setup Guide
+# Jetson Orin Nano — Headless SSH Setup
 
-## Current Configuration
+A generic guide for reaching a Jetson Orin Nano over SSH without a monitor or
+keyboard. Replace the placeholder values (`<...>`) with your own.
 
-| Setting | Value |
-|---------|-------|
-| Hostname | `jetson` |
-| Static IP | `192.168.1.231` |
-| User | `dev` |
-| WiFi Network | `Bear 1` |
-| WiFi MAC Address | `58:02:05:DD:F5:CB` |
-| Auth | SSH Key (`~/.ssh/id_ed25519`) |
+| Setting | Placeholder |
+|---------|-------------|
+| Hostname / SSH alias | `jetson` |
+| Static IP | `192.168.1.100` (example — pick one free on your LAN) |
+| User | `<jetson-user>` |
+| Auth | SSH key (`~/.ssh/id_ed25519`) |
 
 ## Quick Connect
+
+Once configured (see below):
 
 ```bash
 ssh jetson
@@ -19,74 +20,71 @@ ssh jetson
 
 ## Headless Operation
 
-1. Power on the Jetson
-2. Wait 1-2 minutes for boot + WiFi
-3. `ssh jetson` from your Mac
+1. Power on the Jetson.
+2. Wait 1–2 minutes for boot + network.
+3. `ssh jetson` from your computer.
 
-No monitor/keyboard needed.
+No monitor/keyboard needed after the initial network setup.
 
 ---
 
-## Switching WiFi Networks
+## First-Time / Switching WiFi Networks
 
-### Step 1: Connect Monitor/Keyboard to Jetson
+Connecting to a *new* WiFi network requires physical access once (monitor +
+keyboard), because the Jetson needs credentials for a network it can't yet reach.
 
-You need physical access to connect to a new WiFi network.
+### Step 1: Connect a Monitor/Keyboard to the Jetson
 
-### Step 2: Connect to New WiFi
+### Step 2: Connect to WiFi
 
 ```bash
 # List available networks
 nmcli device wifi list
 
-# Connect to new network (replace "Dark Knight" with network name)
-sudo nmcli device wifi connect "Dark Knight" password "your-wifi-password"
+# Connect (replace with your SSID and password)
+sudo nmcli device wifi connect "<YOUR_WIFI_SSID>" password "<YOUR_WIFI_PASSWORD>"
 ```
 
-### Step 3: Get New IP Address
+### Step 3: Get the Assigned IP
 
 ```bash
 hostname -I
 ```
 
-Note the new IP (e.g., `192.168.1.XXX`).
+### Step 4: (Optional) Set a Static IP
 
-### Step 4: Set Static IP on New Network
+A static IP keeps the SSH alias working across reboots.
 
 ```bash
-# Set static IP (use the IP from step 3, or choose one)
-sudo nmcli con mod "Dark Knight" ipv4.addresses 192.168.1.231/24 ipv4.gateway 192.168.1.1 ipv4.dns "8.8.8.8" ipv4.method manual
+# Use the connection name from `nmcli con show`
+sudo nmcli con mod "<YOUR_WIFI_SSID>" \
+    ipv4.addresses 192.168.1.100/24 \
+    ipv4.gateway 192.168.1.1 \
+    ipv4.dns "8.8.8.8" \
+    ipv4.method manual
 
-# Apply changes
-sudo nmcli con up "Dark Knight"
-
-# Verify
+sudo nmcli con up "<YOUR_WIFI_SSID>"
 hostname -I
 ```
 
-### Step 5: Update SSH Config on Mac
+### Step 5: Configure SSH on Your Computer
 
-Edit `~/.ssh/config` on your Mac if IP changed:
-
-```bash
-# Only needed if IP changed
-nano ~/.ssh/config
-```
-
-Update `HostName` to new IP:
+Add an entry to `~/.ssh/config`:
 
 ```
 Host jetson
-    HostName 192.168.1.231
-    User dev
+    HostName 192.168.1.100
+    User <jetson-user>
     IdentityFile ~/.ssh/id_ed25519
-    StrictHostKeyChecking no
-    UserKnownHostsFile /dev/null
     ServerAliveInterval 60
     ServerAliveCountMax 3
 ```
 
-### Step 6: Test Connection
+> `StrictHostKeyChecking no` / `UserKnownHostsFile /dev/null` are convenient on a
+> trusted home LAN where the Jetson is re-imaged often, but they disable
+> host-key verification — omit them if you want the security check.
+
+### Step 6: Test
 
 ```bash
 ssh jetson
@@ -94,122 +92,77 @@ ssh jetson
 
 ---
 
-## Troubleshooting
+## Key-Based Login
 
-### Cannot Connect (Timeout)
-
-1. **Check Jetson IP:**
-   ```bash
-   # On Jetson with monitor
-   hostname -I
-   ```
-
-2. **Update Mac SSH config** with correct IP
-
-3. **Verify Jetson is on same network as Mac:**
-   ```bash
-   # On Mac
-   ping 192.168.1.231
-   ```
-
-### IP Keeps Changing
-
-Set static IP (see Step 4 above), or reserve IP in router:
-
-1. Log into router (`192.168.1.1`)
-2. Find DHCP Reservation / Static Lease
-3. Add: MAC `58:02:05:DD:F5:CB` → IP `192.168.1.231`
-
-### Permission Denied
-
-Re-add SSH key to Jetson:
+Copy your **public** key to the Jetson so you don't need a password:
 
 ```bash
-# On Jetson
+# From your computer (easiest)
+ssh-copy-id -i ~/.ssh/id_ed25519.pub jetson
+```
+
+Or manually, on the Jetson:
+
+```bash
 mkdir -p ~/.ssh
-echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKEqcSc44INVWiVO+1SN/v56HJ9zFTDrb0zhP4OebMbf macbook" >> ~/.ssh/authorized_keys
+echo "<YOUR_PUBLIC_KEY>" >> ~/.ssh/authorized_keys   # contents of id_ed25519.pub
 chmod 700 ~/.ssh
 chmod 600 ~/.ssh/authorized_keys
 ```
 
+Don't have a key yet? Generate one on your computer: `ssh-keygen -t ed25519`.
+
+---
+
+## Troubleshooting
+
+### Cannot Connect (Timeout)
+
+1. Check the Jetson's IP (`hostname -I` on the Jetson).
+2. Update `HostName` in `~/.ssh/config` if it changed.
+3. Verify both machines are on the same network: `ping <jetson-ip>`.
+
+### IP Keeps Changing
+
+Set a static IP (Step 4) or reserve one in your router's DHCP settings by MAC
+address.
+
+### Permission Denied
+
+Re-add your public key to `~/.ssh/authorized_keys` on the Jetson (see
+[Key-Based Login](#key-based-login)) and check the `~/.ssh` permissions above.
+
 ### SSH Not Running
 
 ```bash
-# On Jetson
 sudo systemctl enable ssh
 sudo systemctl start ssh
 ```
 
 ### Network Conflict (Ethernet vs WiFi)
 
-Disable ethernet:
+If a wired connection shadows WiFi, disable the one you're not using:
 
 ```bash
-# On Jetson
-sudo nmcli device disconnect enP8p1s0
-sudo nmcli con mod "Wired connection 1" connection.autoconnect no
+nmcli device status                 # find the interface name
+sudo nmcli device disconnect <iface>
 ```
 
 ---
 
 ## Useful Commands
 
-### On Jetson
-
 ```bash
-# Show all connections
-nmcli con show
+# On the Jetson
+nmcli con show                  # all connections
+nmcli con show --active         # active connection
+nmcli device status             # device/interface status
+ip addr show                    # IP addresses
+sudo systemctl status ssh       # SSH status
 
-# Show active connection
-nmcli con show --active
-
-# Show connection details
-nmcli con show "Bear 1"
-
-# Show device status
-nmcli device status
-
-# Show IP addresses
-ip addr show
-
-# Restart network connection
-sudo nmcli con down "Bear 1" && sudo nmcli con up "Bear 1"
-
-# Check SSH status
-sudo systemctl status ssh
+# On your computer
+ssh -v jetson                   # verbose connect (debugging)
+scp file.txt jetson:~/          # copy to Jetson
+scp jetson:~/file.txt .         # copy from Jetson
+ssh jetson "command here"       # run a remote command
 ```
-
-### On Mac
-
-```bash
-# Test connection
-ssh -v jetson
-
-# Copy file to Jetson
-scp file.txt jetson:~/
-
-# Copy file from Jetson
-scp jetson:~/file.txt .
-
-# Run command on Jetson
-ssh jetson "command here"
-```
-
----
-
-## Saved WiFi Networks
-
-| Network | Static IP | Gateway |
-|---------|-----------|---------|
-| Bear 1 | 192.168.1.231/24 | 192.168.1.1 |
-| Dark Knight | (configure when needed) | (check router) |
-
----
-
-## Router IP Reservation (Recommended)
-
-For permanent static IP, add this to your router's DHCP reservation:
-
-| MAC Address | IP Address |
-|-------------|------------|
-| `58:02:05:DD:F5:CB` | `192.168.1.231` |

@@ -2,6 +2,32 @@
 
 Out-of-tree driver for the Sony IMX708 camera sensor (Raspberry Pi Camera Module 3) on NVIDIA Jetson Orin Nano running JetPack 6.2 (L4T R36.4.x).
 
+> ### ⚠️ Read this first — JetPack 6.2 specifics
+>
+> This README documents the **standard RidgeRun driver flow**, which targets
+> JetPack 6.0. On **JetPack 6.2**, three of those steps do **not** work as
+> written, and the top-level [installation guide](../../docs/installation.md) is
+> the authoritative path:
+>
+> 1. **Use the corrected overlay**, not the bundled `dts/` one. The overlays in
+>    this directory carry RidgeRun's original CSI parameters
+>    (`channel@1`, `discontinuous_clk="yes"`, `lane_polarity="6"`), which cause
+>    `uncorr_err: request timed out` on JP6.2. Use
+>    [`../../docs/overlays/imx708-nvidia-csi.dts`](../../docs/overlays/imx708-nvidia-csi.dts)
+>    (`channel@0`, `discontinuous_clk="no"`, `lane_polarity="0"`).
+> 2. **Pre-merge the overlay** into the base DTB with `fdtoverlay` and use an
+>    `FDT` line in `extlinux.conf`. The `OVERLAYS` directive and `jetson-io` are
+>    ignored by the UEFI boot flow on JP6.2 — see
+>    [`scripts/apply_overlay.sh`](scripts/apply_overlay.sh) and
+>    [`scripts/fix_extlinux.sh`](scripts/fix_extlinux.sh).
+> 3. **Capture with `v4l2-ctl`, not `nvarguscamerasrc`.** The `nvargus` examples
+>    below require ISP tuning files that don't exist for the IMX708; use the raw
+>    Bayer + Python path from the installation guide.
+>
+> The **build/install steps below (the kernel module) are still correct** — you
+> do need `nv_imx708.ko` from here. It's only the overlay/boot/capture steps that
+> differ on JP6.2.
+
 ## Important: CAM1 Port Only
 
 **JetPack 6.2 only supports the IMX708 camera on the CAM1 port, NOT CAM0.**
@@ -19,7 +45,7 @@ Connect your camera ribbon cable to the **CAM1** connector on the Jetson Orin Na
 
 - Jetson Orin Nano Developer Kit
 - JetPack 6.2 (L4T R36.4.3) installed and booted
-- IMX708-based camera (e.g., Arducam UC-376, Raspberry Pi Camera Module 3)
+- IMX708-based camera (e.g., Arducam 12MP IMX708 Wide-Angle, Raspberry Pi Camera Module 3)
 - Camera connected to CSI **CAM1** port
 
 ## Quick Start
@@ -56,7 +82,25 @@ Or:
 sudo make install
 ```
 
-### 4. Configure CSI Connector
+### 4. Configure the device tree
+
+> **JetPack 6.2:** skip `jetson-io` — its "Camera IMX477-C" mode causes capture
+> timeouts, and the overlay it writes is ignored by UEFI. Instead, build the
+> corrected overlay and pre-merge it into the base DTB:
+>
+> ```bash
+> dtc -@ -I dts -O dtb -o imx708-nvidia-csi.dtbo \
+>     ../../docs/overlays/imx708-nvidia-csi.dts
+> sudo fdtoverlay -i <base-dtb> -o <merged-dtb> imx708-nvidia-csi.dtbo
+> # then point the FDT line in extlinux.conf at <merged-dtb> and reboot
+> ```
+>
+> [../../docs/installation.md](../../docs/installation.md) has the exact DTB
+> paths. `scripts/apply_overlay.sh` + `scripts/fix_extlinux.sh` can automate the
+> merge and boot wiring — adjust the `OVERLAY`/`DTB` variables at the top of
+> those scripts to match the corrected overlay you built.
+
+For reference, the standard JetPack 6.0 flow (does **not** work on JP6.2) was:
 
 ```bash
 cd /opt/nvidia/jetson-io/
@@ -104,6 +148,12 @@ v4l2-ctl --list-devices
 ```
 
 ## Usage
+
+> **JetPack 6.2:** the `nvarguscamerasrc` pipelines below need ISP tuning files
+> that don't exist for the IMX708 and will fail with black frames or errors. Use
+> the [Raw Bayer Capture (v4l2)](#raw-bayer-capture-v4l2) method plus the Python
+> processing in [../../docs/installation.md](../../docs/installation.md#image-capture-and-processing).
+> The `nvargus` examples are retained for JetPack 6.0 / ISP-tuned setups.
 
 ### Display Preview
 
@@ -259,7 +309,11 @@ chmod +x install_full.sh
 ./build.sh uninstall
 ```
 
-Then remove the OVERLAYS line from `/boot/extlinux/extlinux.conf` and reboot.
+Then revert your boot configuration and reboot. On **JetPack 6.2** that means
+restoring the original `FDT` line in `/boot/extlinux/extlinux.conf` (or its
+`.backup`) so it points at the stock DTB rather than the merged
+`…-imx708-nvidia-csi.dtb`. On JetPack 6.0 setups, remove the `OVERLAYS` line
+instead.
 
 ## Credits
 
@@ -269,7 +323,10 @@ Then remove the OVERLAYS line from `/boot/extlinux/extlinux.conf` and reboot.
 
 ## License
 
-GPL v2 - See source files for full license text.
+**GPL-2.0.** This driver is derived from RidgeRun's `nv_imx708` driver and the
+Linux kernel. The full license text is in [`COPYING`](COPYING); the controlling
+copyright and license notices are in each source file's header (NVIDIA,
+RidgeRun, and Raspberry Pi Ltd).
 
 ## Support
 

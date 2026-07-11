@@ -1,5 +1,13 @@
 .DS_Store
 
+# Local tooling / editor config (may contain machine-specific paths)
+.claude/
+.vscode/
+.idea/
+
+# Local drafting docs (never ship in the public repo)
+REDDIT_REPLIES.md
+
 # Kernel module build artifacts
 *.o
 *.ko
