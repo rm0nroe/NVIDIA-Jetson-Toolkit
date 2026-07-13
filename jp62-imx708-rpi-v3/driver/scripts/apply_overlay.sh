@@ -6,6 +6,11 @@
 
 # Don't use set -e so we can process all locations even if one fails
 
+# NOTE (JetPack 6.2): OVERLAY below defaults to the bundled RidgeRun overlay,
+# which uses the original CAM0 CSI params (channel@0, discontinuous_clk=yes,
+# lane_polarity=6) and TIMES OUT on JP6.2. Point OVERLAY at the corrected overlay
+# instead — compile docs/overlays/imx708-nvidia-csi.dts to a .dtbo and use that.
+# Adjust DTB_NAME to the base DTB your bootloader actually reads.
 DTB_NAME="kernel_tegra234-p3768-0000+p3767-0005-nv-super.dtb"
 OVERLAY="/boot/tegra234-camera-imx708-orin-nano.dtbo"
 

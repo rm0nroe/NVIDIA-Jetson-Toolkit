@@ -24,12 +24,12 @@ TESTS_PASSED=0
 TESTS_FAILED=0
 
 test_result() {
-    if [ $1 -eq 0 ]; then
+    if [ "$1" -eq 0 ]; then
         echo_pass "$2"
-        ((TESTS_PASSED++))
+        TESTS_PASSED=$((TESTS_PASSED + 1))
     else
         echo_fail "$2"
-        ((TESTS_FAILED++))
+        TESTS_FAILED=$((TESTS_FAILED + 1))
     fi
 }
 
@@ -64,7 +64,8 @@ fi
 # Test 3: Check device tree
 echo ""
 echo_info "Test 3: Checking device tree..."
-DT_PATH="/proc/device-tree/bus@0/cam_i2cmux/i2c@0/rbpcv3_imx708_a@1a"
+# CAM1 node (JetPack 6.2): sensor lives under cam_i2cmux/i2c@1 as rbpcv3_imx708_c@1a
+DT_PATH="/proc/device-tree/bus@0/cam_i2cmux/i2c@1/rbpcv3_imx708_c@1a"
 if [ -d "$DT_PATH" ]; then
     test_result 0 "IMX708 device tree node exists"
     if [ -f "$DT_PATH/status" ]; then
@@ -127,17 +128,47 @@ else
     echo_warn "i2cdetect not installed. Install with: sudo apt install i2c-tools"
 fi
 
-# Test 7: Check extlinux.conf for overlay
+# Test 7: Check the active extlinux entry points at a merged IMX708 DTB
 echo ""
 echo_info "Test 7: Checking bootloader configuration..."
+# JetPack 6.2 ignores the OVERLAYS directive; the working config uses an FDT
+# line pointing at a DTB that already has the imx708 overlay merged in.
 EXTLINUX="/boot/extlinux/extlinux.conf"
 if [ -f "$EXTLINUX" ]; then
-    if grep -q "tegra234-camera-imx708-orin-nano.dtbo" "$EXTLINUX"; then
-        test_result 0 "Device tree overlay configured in extlinux.conf"
+    DEFAULT_LABEL=$(awk 'toupper($1) == "DEFAULT" { print $2; exit }' "$EXTLINUX")
+    FDT_PATH=$(awk -v default_label="$DEFAULT_LABEL" '
+        toupper($1) == "LABEL" {
+            if (default_label == "" && !seen_label) {
+                active = 1
+            } else {
+                active = ($2 == default_label)
+            }
+            seen_label = 1
+            next
+        }
+        active && toupper($1) == "FDT" { print $2; exit }
+    ' "$EXTLINUX")
+
+    if [ -z "$FDT_PATH" ]; then
+        test_result 1 "No FDT line found in the active extlinux.conf entry"
+        echo_info "Set the active entry's FDT line to the pre-merged DTB."
+        echo_info "See docs/installation.md for the verified JP6.2 procedure."
+    elif [ ! -f "$FDT_PATH" ]; then
+        test_result 1 "Active FDT file does not exist: $FDT_PATH"
+    elif command -v dtc &> /dev/null; then
+        if dtc -I dtb -O dts "$FDT_PATH" 2>/dev/null | grep -qi "imx708"; then
+            test_result 0 "Active FDT contains the merged IMX708 device tree"
+            echo_info "Active FDT: $FDT_PATH"
+        else
+            test_result 1 "Active FDT does not contain an IMX708 device-tree node"
+            echo_info "Active FDT: $FDT_PATH"
+        fi
+    elif strings "$FDT_PATH" 2>/dev/null | grep -qi "imx708"; then
+        test_result 0 "Active FDT contains the merged IMX708 device tree"
+        echo_info "Active FDT: $FDT_PATH"
     else
-        test_result 1 "Device tree overlay NOT configured in extlinux.conf"
-        echo_info "Add to $EXTLINUX after FDT line:"
-        echo "      OVERLAYS /boot/tegra234-camera-imx708-orin-nano.dtbo"
+        test_result 1 "Could not verify IMX708 content in the active FDT"
+        echo_info "Install device-tree-compiler for a definitive check: sudo apt install device-tree-compiler"
     fi
 else
     echo_warn "extlinux.conf not found"
@@ -155,19 +186,20 @@ echo ""
 if [ $TESTS_FAILED -eq 0 ]; then
     echo_pass "All tests passed! Camera should be operational."
     echo ""
-    echo "Try capturing with:"
-    echo "  gst-launch-1.0 nvarguscamerasrc sensor-id=0 ! \\"
-    echo "    'video/x-raw(memory:NVMM),width=4608,height=2592,framerate=14/1' ! \\"
-    echo "    nvvidconv ! xvimagesink"
+    echo "Capture a raw frame with (IMX708 lacks the ISP tuning required by nvarguscamerasrc):"
+    echo "  v4l2-ctl -d /dev/video0 \\"
+    echo "    --set-fmt-video=width=4608,height=2592,pixelformat=RG10 \\"
+    echo "    --stream-mmap --stream-count=1 --stream-to=/tmp/frame.raw"
+    echo "  # then debayer in Python/OpenCV (see docs/installation.md)"
 else
     echo_fail "Some tests failed. Please check the errors above."
     echo ""
     echo "Troubleshooting steps:"
-    echo "  1. Verify camera is physically connected to CAM0 port"
+    echo "  1. Verify camera is physically connected to the CAM1 port (not CAM0)"
     echo "  2. Check kernel module: sudo modprobe nv_imx708"
     echo "  3. Check dmesg for errors: dmesg | grep -i imx708"
-    echo "  4. Verify overlay in extlinux.conf"
-    echo "  5. Reboot if overlay was just added"
+    echo "  4. Verify the FDT line in extlinux.conf points at the merged imx708 DTB"
+    echo "  5. Reboot if the DTB/boot config was just changed"
 fi
 
 exit $TESTS_FAILED

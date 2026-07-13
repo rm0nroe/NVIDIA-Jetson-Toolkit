@@ -236,7 +236,8 @@ driver/
 ### Camera not detected on I2C
 
 1. Verify camera is connected to **CAM1** (not CAM0)
-2. Run jetson-io and select **"Camera IMX477-C"**
+2. Verify the active `FDT` entry points to the pre-merged DTB described in
+   [`../../docs/installation.md`](../../docs/installation.md)
 3. Power cycle the Jetson (full shutdown, not just reboot)
 4. Check cable orientation: contacts facing the heatsink
 

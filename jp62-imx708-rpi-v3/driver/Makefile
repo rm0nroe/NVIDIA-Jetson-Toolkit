@@ -99,13 +99,20 @@ install: all
 	echo "$(DRIVER_NAME)" | sudo tee /etc/modules-load.d/imx708.conf > /dev/null
 	@echo ""
 	@echo "============================================="
-	@echo "Installation complete!"
+	@echo "Kernel module installed!"
 	@echo ""
-	@echo "IMPORTANT: You must configure the bootloader to load the overlay."
-	@echo "Edit /boot/extlinux/extlinux.conf and add after the FDT line:"
-	@echo "      OVERLAYS $(DTBO_INSTALL_DIR)/$(DTBO_FILE)"
+	@echo "IMPORTANT (JetPack 6.2): do NOT use the OVERLAYS directive, and do NOT"
+	@echo "boot the bundled $(DTBO_FILE) as-is — it carries RidgeRun's original"
+	@echo "CSI params (including discontinuous_clk=yes and lane_polarity=6) that"
+	@echo "cause capture timeouts on JP6.2."
 	@echo ""
-	@echo "Then reboot: sudo reboot"
+	@echo "Instead, build the corrected overlay and pre-merge it into the DTB:"
+	@echo "  dtc -@ -I dts -O dtb -o imx708-nvidia-csi.dtbo \\"
+	@echo "      ../../docs/overlays/imx708-nvidia-csi.dts"
+	@echo "  sudo fdtoverlay -i <base-dtb> -o <merged-dtb> imx708-nvidia-csi.dtbo"
+	@echo "  # then set the FDT line in extlinux.conf to <merged-dtb>, and reboot"
+	@echo ""
+	@echo "Full step-by-step (with the exact DTB paths): ../../docs/installation.md"
 	@echo "============================================="
 
 uninstall:
@@ -115,7 +122,7 @@ uninstall:
 	sudo rm -f /etc/modules-load.d/imx708.conf
 	sudo depmod -a
 	@echo "Uninstallation complete."
-	@echo "Note: Remember to remove the OVERLAYS line from /boot/extlinux/extlinux.conf"
+	@echo "Note: Restore the original FDT line/stock DTB in /boot/extlinux/extlinux.conf"
 
 help:
 	@echo "IMX708 Camera Driver Build System - JetPack 6.2"

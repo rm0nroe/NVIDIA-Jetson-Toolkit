@@ -41,11 +41,18 @@ ls /sys/firmware/devicetree/base/tegra-camera-platform/ 2>/dev/null || echo "  N
 echo ""
 
 echo "=== 5. IMX708 DEVICE NODE ==="
-if [ -d "/sys/firmware/devicetree/base/bus@0/i2c@3180000/rbpcv3_imx708_a@1a" ]; then
-    echo "✓ IMX708 node EXISTS at /bus@0/i2c@3180000/rbpcv3_imx708_a@1a"
-    ls /sys/firmware/devicetree/base/bus@0/i2c@3180000/rbpcv3_imx708_a@1a/
+# CAM1 (JetPack 6.2, the supported port): cam_i2cmux/i2c@1/rbpcv3_imx708_c@1a
+CAM1_NODE="/sys/firmware/devicetree/base/bus@0/cam_i2cmux/i2c@1/rbpcv3_imx708_c@1a"
+# CAM0 (bus 2) for reference on other configurations
+CAM0_NODE="/sys/firmware/devicetree/base/bus@0/i2c@3180000/rbpcv3_imx708_a@1a"
+if [ -d "$CAM1_NODE" ]; then
+    echo "✓ IMX708 node EXISTS at (CAM1) ${CAM1_NODE#/sys/firmware/devicetree/base}"
+    ls "$CAM1_NODE/"
+elif [ -d "$CAM0_NODE" ]; then
+    echo "⚠ IMX708 node found at CAM0 (unsupported on JP6.2): ${CAM0_NODE#/sys/firmware/devicetree/base}"
+    ls "$CAM0_NODE/"
 else
-    echo "✗ IMX708 node NOT FOUND in device tree"
+    echo "✗ IMX708 node NOT FOUND in device tree (checked CAM1 i2c@1 and CAM0 i2c@3180000)"
 fi
 echo ""
 
@@ -107,17 +114,17 @@ if [ -e /dev/media0 ]; then
 fi
 echo ""
 
-echo "=== 15. I2C BUS 2 DETAILED CHECK ==="
-echo "Checking i2c-2 (3180000.i2c) specifically..."
-if [ -e /dev/i2c-2 ]; then
-    echo "  /dev/i2c-2 exists"
+echo "=== 15. I2C BUS 9 DETAILED CHECK (CAM1) ==="
+echo "Checking i2c-9 (CAM1 via cam_i2cmux) specifically..."
+if [ -e /dev/i2c-9 ]; then
+    echo "  /dev/i2c-9 exists"
     echo "  Scanning with repeated start..."
-    sudo i2cdetect -y -r 2
+    sudo i2cdetect -y -r 9
     echo ""
     echo "  Trying direct read at 0x1a..."
-    sudo i2cget -y 2 0x1a 0x00 2>&1 || echo "  (Read failed - camera not responding)"
+    sudo i2cget -y 9 0x1a 0x00 2>&1 || echo "  (Read failed - camera not responding or driver bound)"
 else
-    echo "  /dev/i2c-2 does NOT exist!"
+    echo "  /dev/i2c-9 does NOT exist (is the overlay applied and the camera on CAM1?)"
 fi
 echo ""
 
@@ -126,7 +133,8 @@ echo "DIAGNOSTIC COMPLETE"
 echo "=============================================="
 echo ""
 echo "INTERPRETATION:"
-echo "- If I2C bus 2 shows '1a': Camera IS detected, driver issue"
-echo "- If I2C bus 2 is empty: Camera NOT detected, hardware issue"
+echo "- If I2C bus 9 shows '1a' or 'UU': Camera IS detected (UU = driver bound)"
+echo "- If I2C bus 9 is empty: Camera NOT detected — check CAM1 cabling/orientation"
+echo "  (bus 9 is CAM1 via cam_i2cmux; bus 2 is CAM0, used on other configs)"
 echo "- Check dmesg sections for specific error messages"
 echo ""
