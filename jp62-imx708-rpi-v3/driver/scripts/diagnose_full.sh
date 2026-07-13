@@ -49,7 +49,7 @@ if [ -d "$CAM1_NODE" ]; then
     echo "✓ IMX708 node EXISTS at (CAM1) ${CAM1_NODE#/sys/firmware/devicetree/base}"
     ls "$CAM1_NODE/"
 elif [ -d "$CAM0_NODE" ]; then
-    echo "✓ IMX708 node EXISTS at (CAM0) ${CAM0_NODE#/sys/firmware/devicetree/base}"
+    echo "⚠ IMX708 node found at CAM0 (unsupported on JP6.2): ${CAM0_NODE#/sys/firmware/devicetree/base}"
     ls "$CAM0_NODE/"
 else
     echo "✗ IMX708 node NOT FOUND in device tree (checked CAM1 i2c@1 and CAM0 i2c@3180000)"

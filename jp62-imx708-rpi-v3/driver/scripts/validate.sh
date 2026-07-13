@@ -24,12 +24,12 @@ TESTS_PASSED=0
 TESTS_FAILED=0
 
 test_result() {
-    if [ $1 -eq 0 ]; then
+    if [ "$1" -eq 0 ]; then
         echo_pass "$2"
-        ((TESTS_PASSED++))
+        TESTS_PASSED=$((TESTS_PASSED + 1))
     else
         echo_fail "$2"
-        ((TESTS_FAILED++))
+        TESTS_FAILED=$((TESTS_FAILED + 1))
     fi
 }
 
@@ -128,20 +128,47 @@ else
     echo_warn "i2cdetect not installed. Install with: sudo apt install i2c-tools"
 fi
 
-# Test 7: Check extlinux.conf points at a merged (imx708) DTB via FDT
+# Test 7: Check the active extlinux entry points at a merged IMX708 DTB
 echo ""
 echo_info "Test 7: Checking bootloader configuration..."
 # JetPack 6.2 ignores the OVERLAYS directive; the working config uses an FDT
 # line pointing at a DTB that already has the imx708 overlay merged in.
 EXTLINUX="/boot/extlinux/extlinux.conf"
 if [ -f "$EXTLINUX" ]; then
-    if grep -qE "^[[:space:]]*FDT[[:space:]].*imx708" "$EXTLINUX"; then
-        test_result 0 "FDT line points at a merged imx708 DTB in extlinux.conf"
+    DEFAULT_LABEL=$(awk 'toupper($1) == "DEFAULT" { print $2; exit }' "$EXTLINUX")
+    FDT_PATH=$(awk -v default_label="$DEFAULT_LABEL" '
+        toupper($1) == "LABEL" {
+            if (default_label == "" && !seen_label) {
+                active = 1
+            } else {
+                active = ($2 == default_label)
+            }
+            seen_label = 1
+            next
+        }
+        active && toupper($1) == "FDT" { print $2; exit }
+    ' "$EXTLINUX")
+
+    if [ -z "$FDT_PATH" ]; then
+        test_result 1 "No FDT line found in the active extlinux.conf entry"
+        echo_info "Set the active entry's FDT line to the pre-merged DTB."
+        echo_info "See docs/installation.md for the verified JP6.2 procedure."
+    elif [ ! -f "$FDT_PATH" ]; then
+        test_result 1 "Active FDT file does not exist: $FDT_PATH"
+    elif command -v dtc &> /dev/null; then
+        if dtc -I dtb -O dts "$FDT_PATH" 2>/dev/null | grep -qi "imx708"; then
+            test_result 0 "Active FDT contains the merged IMX708 device tree"
+            echo_info "Active FDT: $FDT_PATH"
+        else
+            test_result 1 "Active FDT does not contain an IMX708 device-tree node"
+            echo_info "Active FDT: $FDT_PATH"
+        fi
+    elif strings "$FDT_PATH" 2>/dev/null | grep -qi "imx708"; then
+        test_result 0 "Active FDT contains the merged IMX708 device tree"
+        echo_info "Active FDT: $FDT_PATH"
     else
-        test_result 1 "No FDT line referencing a merged imx708 DTB in extlinux.conf"
-        echo_info "On JetPack 6.2, pre-merge the overlay and set an FDT line, e.g.:"
-        echo "      FDT /boot/tegra234-p3768-0000+p3767-0005-imx708-nvidia-csi.dtb"
-        echo_info "See scripts/apply_overlay.sh and scripts/fix_extlinux.sh."
+        test_result 1 "Could not verify IMX708 content in the active FDT"
+        echo_info "Install device-tree-compiler for a definitive check: sudo apt install device-tree-compiler"
     fi
 else
     echo_warn "extlinux.conf not found"
@@ -159,7 +186,7 @@ echo ""
 if [ $TESTS_FAILED -eq 0 ]; then
     echo_pass "All tests passed! Camera should be operational."
     echo ""
-    echo "Capture a raw frame with (nvarguscamerasrc is not available on JP6.2):"
+    echo "Capture a raw frame with (IMX708 lacks the ISP tuning required by nvarguscamerasrc):"
     echo "  v4l2-ctl -d /dev/video0 \\"
     echo "    --set-fmt-video=width=4608,height=2592,pixelformat=RG10 \\"
     echo "    --stream-mmap --stream-count=1 --stream-to=/tmp/frame.raw"

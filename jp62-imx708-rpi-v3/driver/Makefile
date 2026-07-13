@@ -103,7 +103,7 @@ install: all
 	@echo ""
 	@echo "IMPORTANT (JetPack 6.2): do NOT use the OVERLAYS directive, and do NOT"
 	@echo "boot the bundled $(DTBO_FILE) as-is — it carries RidgeRun's original"
-	@echo "CSI params (discontinuous_clk=yes, lane_polarity=6, channel@1) that"
+	@echo "CSI params (including discontinuous_clk=yes and lane_polarity=6) that"
 	@echo "cause capture timeouts on JP6.2."
 	@echo ""
 	@echo "Instead, build the corrected overlay and pre-merge it into the DTB:"
@@ -122,7 +122,7 @@ uninstall:
 	sudo rm -f /etc/modules-load.d/imx708.conf
 	sudo depmod -a
 	@echo "Uninstallation complete."
-	@echo "Note: Remember to remove the OVERLAYS line from /boot/extlinux/extlinux.conf"
+	@echo "Note: Restore the original FDT line/stock DTB in /boot/extlinux/extlinux.conf"
 
 help:
 	@echo "IMX708 Camera Driver Build System - JetPack 6.2"
